@@ -3,8 +3,6 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-
-
 export default async function DashboardLayout({
   children,
 }: {
@@ -14,6 +12,7 @@ export default async function DashboardLayout({
     headers: await headers(),
   });
   
+  console.log(session)
   if(!session){
     redirect("/login");
   }

@@ -1,35 +1,44 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { authClient } from "@/lib/authClient";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function signInEmail( _: { error?: string } | null,formData: FormData) {
-  const email = formData.get("email")?.toString().trim();
-  const password = formData.get("password")?.toString();
+// export async function signInEmail( _: { error?: string } | null,formData: FormData) {
+//   const email = formData.get("email")?.toString().trim();
+//   const password = formData.get("password")?.toString();
 
-  if (!email || !password) {
-    return {
-      error: "Email and password are required.",
-    };
-  }
+//   if (!email || !password) {
+//     return {
+//       error: "Email and password are required.",
+//     };
+//   }
 
-  try {
-    await auth.api.signInEmail({
-      body: {
-        email,
-        password,
-      },
-      headers: await headers(),
-    });
-  } catch {
-    return {
-      error: "Invalid email or password.",
-    };
-  }
+//   try {
+//     const result = await auth.api.signInEmail({
+//       body: {
+//         email,
+//         password,
+//       },
+//       headers: await headers(),
+//     });
+//     console.log(result);
+//   } catch(error) {
+//     console.error(error);
+    
+//     return{
+//       error:
+//         error instanceof Error ? error.message : "Invalid email or Password",
+//     }
+      
+//   }
 
-  redirect("/dashboard");
-}
+//   redirect("/dashboard");
+// }
+
+
+
 
 export async function signUpEmail(
   _: { error?: string } | null,

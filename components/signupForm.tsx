@@ -1,10 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
-
-import { signUpEmail } from "@/server/auth-actions";
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,16 +17,64 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/authClient";
+import { useRouter } from "next/navigation";
 
 const initialState = {
   error: "",
 };
 
 export function SignupForm() {
-  const [state, formAction, pending] = useActionState(
-    signUpEmail,
-    initialState
-  );
+      const router = useRouter();
+
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("")
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
+    e.preventDefault();
+    setPending(true);
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+
+    const name = formData.get("name")?.toString().trim() ?? "";
+    const email = formData.get("email")?.toString().trim() ?? "";
+    const password = formData.get("password")?.toString() ?? "";
+    const confirmPassword = formData.get("confirm-password")?.toString() ?? "";
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setPending(false);
+      return;
+    }
+
+    try {
+
+      const {error} = await authClient.signUp.email({
+        name,
+        email,
+        password,
+        callbackURL: "/"
+      })
+      // console.log(result);
+
+      if (error) {
+        setError(error.message ?? "Unable to create account.");
+        setPending(false);
+        return;
+      }
+       router.push("/dashboard");
+  router.refresh();
+    }
+    catch {
+      setError("Something went wrong");
+    }
+    finally {
+      setPending(false);
+    }
+  }
+
 
   return (
     <Card className="mx-auto w-full max-w-md">
@@ -41,7 +86,7 @@ export function SignupForm() {
       </CardHeader>
 
       <CardContent>
-        <form action={formAction}>
+        <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
               <FieldLabel>Name</FieldLabel>
@@ -85,9 +130,9 @@ export function SignupForm() {
               />
             </Field>
 
-            {state?.error && (
+            {error && (
               <FieldDescription className="text-destructive">
-                {state.error}
+                {error}
               </FieldDescription>
             )}
 

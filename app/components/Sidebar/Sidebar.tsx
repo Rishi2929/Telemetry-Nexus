@@ -104,11 +104,6 @@ export default function Sidebar() {
           Theme
         </Button>
 
-        {/* <Button variant="outline" className="w-full justify-start">
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button> */}
-
         <form action={signOut}>
           <Button type="submit" variant="outline" className="w-full justify-start">
             <LogOut className="mr-2 h-4 w-4"/>

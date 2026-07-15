@@ -1,9 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
-
-
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,19 +16,55 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signInEmail } from "@/server/auth-actions";
 import Link from "next/link";
+import { authClient } from "@/lib/authClient";
 
 
-const initialState = {
-  error: "",
-};
+
 
 export function LoginForm() {
-  const [state, formAction, pending] = useActionState(
-    signInEmail,
-    initialState
-  );
+
+  // const router = useRouter();
+
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setPending(true);
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+
+    const email = formData.get("email")?.toString().trim() ?? "";
+    const password = formData.get("password")?.toString() ?? "";
+
+    try {
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: "/dashboard"
+      })
+
+      if (error) {
+        setError(error.message ?? "Unable to sign in ");
+        setPending(false);
+        return;
+      }
+    }
+    catch{
+      setError("Something went wrong");
+    }
+    finally{
+      setPending(false);
+    }
+
+
+    // router.push("/dashboard");
+    // router.refresh();
+  }
+
 
   return (
     <Card className="mx-auto w-full max-w-md">
@@ -43,7 +76,7 @@ export function LoginForm() {
       </CardHeader>
 
       <CardContent>
-        <form action={formAction}>
+        <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
               <FieldLabel>Email</FieldLabel>
@@ -66,9 +99,9 @@ export function LoginForm() {
               />
             </Field>
 
-            {state?.error && (
+            {error && (
               <FieldDescription className="text-destructive">
-                {state.error}
+                {error}
               </FieldDescription>
             )}
 
