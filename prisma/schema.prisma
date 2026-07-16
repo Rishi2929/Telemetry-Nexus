@@ -15,10 +15,79 @@ model User {
   updatedAt     DateTime  @updatedAt
   emailVerified Boolean   @default(false)
   image         String?
-  sessions      Session[]
-  accounts      Account[]
+
+  sessions Session[]
+  accounts Account[]
+
+  // TelemetryNexus
+  projects Project[]
 
   @@map("user")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+
+  apiKey      String   @unique
+
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerId     String
+  owner       User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  apiLogs     ApiLog[]
+  incidents   Incident[]
+
+  @@index([ownerId])
+}
+
+model ApiLog {
+  id          String   @id @default(cuid())
+
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  requestId   String?
+
+  method      String
+  endpoint    String
+
+  statusCode  Int
+  latency     Float
+
+  ipAddress   String?
+  userAgent   String?
+
+  timestamp   DateTime @default(now())
+
+  @@index([projectId])
+  @@index([timestamp])
+  @@index([statusCode])
+}
+
+model Incident {
+  id          String   @id @default(cuid())
+
+  title       String
+  description String?
+
+  severity    String
+
+  resolved    Boolean @default(false)
+
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([resolved])
 }
 
 model Session {
@@ -29,15 +98,16 @@ model Session {
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
+
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("session")
 }
 
 model Account {
-  id                    String    @id
+  id                    String   @id
   accountId             String
   providerId            String
   userId                String
@@ -48,8 +118,8 @@ model Account {
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
