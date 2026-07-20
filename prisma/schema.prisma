@@ -30,9 +30,9 @@ model Project {
   name        String
   description String?
 
-  apiKey      String   @unique
+  apiKeys     ApiKey[] 
 
-  isActive    Boolean  @default(true)
+  // isActive    Boolean  @default(true)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -46,6 +46,26 @@ model Project {
   @@index([ownerId])
 }
 
+model ApiKey{
+  id          String @id @default(cuid())
+
+  apiKey      String @unique
+
+  active      Boolean @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastUsedAt  DateTime? 
+
+  expiresAt DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+
+}
+
 model ApiLog {
   id          String   @id @default(cuid())
 
@@ -54,8 +74,10 @@ model ApiLog {
 
   requestId   String?
 
-  method      String
+  method      Method
   endpoint    String
+
+  environment Environment
 
   statusCode  Int
   latency     Float
@@ -70,15 +92,30 @@ model ApiLog {
   @@index([statusCode])
 }
 
+enum Environment {
+  PRODUCTION 
+  STAGING 
+  DEVELOPMENT
+}
+
+enum Method{
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+}
+
 model Incident {
   id          String   @id @default(cuid())
 
   title       String
   description String?
 
-  severity    String
+  severity    Severity
 
   resolved    Boolean @default(false)
+  resolvedAt  DateTime?
 
   projectId   String
   project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -89,6 +126,14 @@ model Incident {
   @@index([projectId])
   @@index([resolved])
 }
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH 
+  CRITICAL
+}
+
 
 model Session {
   id        String   @id
