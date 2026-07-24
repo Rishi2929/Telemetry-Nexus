@@ -49,20 +49,22 @@ model Project {
 model ApiKey{
   id          String @id @default(cuid())
 
-  apiKey      String @unique
+  name        String @default("Default")
+  keyHash     String @unique
 
   active      Boolean @default(true)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   lastUsedAt  DateTime? 
-
-  expiresAt DateTime?
+  expiresAt   DateTime?
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
+  @@index([projectId, active])
+
 
 }
 
@@ -99,7 +101,7 @@ enum Environment {
 }
 
 enum Method{
-  GET
+  GET 
   POST
   PUT
   PATCH
