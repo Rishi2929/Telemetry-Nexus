@@ -6,9 +6,7 @@ type ApiKeyPageProps = {
   }>;
 };
 
-export default async function ApiKeyPage({
-  params,
-}: ApiKeyPageProps) {
+export default async function ApiKeyPage({ params }: ApiKeyPageProps) {
   const { projectId } = await params;
 
   return <ApiKeyCard projectId={projectId} />;
