@@ -1,4 +1,4 @@
-import ApiKeyCard from "./api-key-card";
+import ApiKeyCard from "./components/api-key-card";
 
 type ApiKeyPageProps = {
   params: Promise<{

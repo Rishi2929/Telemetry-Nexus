@@ -23,9 +23,7 @@ type DeleteProjectDialogProps = {
 export function DeleteProjectDialog({ projectId, projectName }: DeleteProjectDialogProps) {
   return (
     <AlertDialog>
-      <AlertDialogTrigger>
-        <Button variant="destructive">Delete</Button>
-      </AlertDialogTrigger>
+      <AlertDialogTrigger render={<Button variant="destructive">Delete</Button>} />
 
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -44,12 +42,14 @@ export function DeleteProjectDialog({ projectId, projectName }: DeleteProjectDia
           <form action={deleteProject}>
             <input type="hidden" name="projectId" value={projectId} />
 
-            <AlertDialogAction>
-              <Button type="submit" variant="destructive" className="text-white">
-                Delete
-              </Button>
-            </AlertDialogAction>
-          </form>{" "}
+            <AlertDialogAction
+              render={
+                <Button type="submit" variant="destructive" className="text-white">
+                  Delete
+                </Button>
+              }
+            />
+          </form>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

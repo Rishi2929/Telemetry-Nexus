@@ -1,14 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ProjectForm } from "./project-form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProjectForm } from "./components/project-form";
 
 export default function NewProjectPage() {
   return (
@@ -24,19 +18,14 @@ export default function NewProjectPage() {
 
         <div>
           <h1 className="text-3xl font-bold">Create Project</h1>
-          <p className="text-muted-foreground mt-1">
-            Create a new project to start collecting telemetry and monitoring
-            your application.
-          </p>
+          <p className="text-muted-foreground mt-1">Create a new project to start collecting telemetry and monitoring your application.</p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Project Details</CardTitle>
-          <CardDescription>
-            Fill in the information below to create your project.
-          </CardDescription>
+          <CardDescription>Fill in the information below to create your project.</CardDescription>
         </CardHeader>
 
         <CardContent>

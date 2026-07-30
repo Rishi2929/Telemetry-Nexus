@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/session";
 
-import { ProjectEditForm } from "./project-edit-form";
+import { ProjectEditForm } from "./components/project-edit-form";
 
 type EditProjectPageProps = { params: Promise<{ projectId: string }> };
 

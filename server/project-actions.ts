@@ -3,7 +3,7 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/session";
-import { generateApiKey, hashApiKey } from "@/lib/api-key";
+import { createApiKey, generateApiKey, hashApiKey } from "@/lib/api-key";
 import { cookies } from "next/headers";
 
 export async function createProject(formData: FormData) {
@@ -12,6 +12,7 @@ export async function createProject(formData: FormData) {
   if (!session) {
     throw new Error("Unauthorized");
   }
+  console.log("Session ID: ", session.user.id);
 
   const name = formData.get("name")?.toString().trim() ?? "";
   const description = formData.get("description")?.toString().trim() ?? "";
@@ -103,4 +104,59 @@ export async function deleteProject(formData: FormData) {
   }
 
   redirect("/projects");
+}
+
+export async function regenerateApiKey(formData: FormData) {
+  const projectId = formData.get("projectId")?.toString();
+
+  if (!projectId) {
+    throw new Error("Project Id is required");
+  }
+
+  const session = await getServerSession();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      ownerId: session.user.id,
+    },
+    include: {
+      apiKeys: true,
+    },
+  });
+
+  if (!project) {
+    throw new Error("Project not found.");
+  }
+
+  const existingApiKey = project.apiKeys[0];
+
+  if (!existingApiKey) {
+    throw new Error("API key not found.");
+  }
+
+  const { apiKey, keyHash } = await createApiKey();
+  await prisma.apiKey.update({
+    where: {
+      id: existingApiKey.id,
+    },
+    data: {
+      keyHash,
+    },
+  });
+
+  const cookieStore = await cookies();
+
+  cookieStore.set("new-api-key", apiKey, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 5,
+    path: "/",
+  });
+
+  redirect(`/projects/${project.id}/api-key`);
 }
