@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 type ApiKeyCardProps = {
   projectId: string;
@@ -49,19 +50,7 @@ export default function ApiKeyCard({ projectId }: ApiKeyCardProps) {
   }
 
   if (!apiKey) {
-    return (
-      <div className="flex min-h-[70vh] items-center justify-center px-4">
-        <Card className="w-full max-w-lg">
-          <CardHeader>
-            <CardTitle>API Key Not Available</CardTitle>
-
-            <CardDescription>
-              This API key can no longer be viewed. If you didn't save it, generate a new API key from your project settings.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
+    redirect(`/projects/${projectId}`);
   }
 
   return (

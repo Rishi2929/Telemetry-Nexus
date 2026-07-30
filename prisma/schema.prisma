@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String
-  email         String    @unique
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  emailVerified Boolean  @default(false)
   image         String?
 
   sessions Session[]
@@ -26,82 +26,93 @@ model User {
 }
 
 model Project {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String?
 
-  apiKeys     ApiKey[] 
+  apiKeys ApiKey[]
 
   // isActive    Boolean  @default(true)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  ownerId     String
-  owner       User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  apiLogs     ApiLog[]
-  incidents   Incident[]
+  apiLogs   ApiLog[]
+  incidents Incident[]
 
   @@index([ownerId])
 }
 
-model ApiKey{
-  id          String @id @default(cuid())
+model ApiKey {
+  id String @id @default(cuid())
 
-  name        String @default("Default")
-  keyHash     String @unique
+  name    String @default("Default")
+  keyHash String @unique
 
-  active      Boolean @default(true)
+  active Boolean @default(true)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  lastUsedAt  DateTime? 
-  expiresAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([projectId, active])
-
-
 }
 
 model ApiLog {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  projectId   String
-  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  requestId   String?
+  requestId String?
 
-  method      Method
-  endpoint    String
+  level   LogLevel
+  message String
+
+  method   Method
+  endpoint String
 
   environment Environment
 
-  statusCode  Int
-  latency     Float
+  statusCode Int
+  latency    Int
 
-  ipAddress   String?
-  userAgent   String?
+  ipAddress String?
+  userAgent String?
 
-  timestamp   DateTime @default(now())
+  metadata Json?
 
-  @@index([projectId])
-  @@index([timestamp])
+  createdAt DateTime @default(now())
+
+  @@index([projectId, createdAt])
   @@index([statusCode])
 }
 
+enum LogLevel {
+  TRACE
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+}
+
 enum Environment {
-  PRODUCTION 
-  STAGING 
+  PRODUCTION
+  STAGING
   DEVELOPMENT
 }
 
-enum Method{
-  GET 
+enum Method {
+  GET
   POST
   PUT
   PATCH
@@ -109,21 +120,21 @@ enum Method{
 }
 
 model Incident {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
   title       String
   description String?
 
-  severity    Severity
+  severity Severity
 
-  resolved    Boolean @default(false)
-  resolvedAt  DateTime?
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime?
 
-  projectId   String
-  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([projectId])
   @@index([resolved])
@@ -132,10 +143,9 @@ model Incident {
 enum Severity {
   LOW
   MEDIUM
-  HIGH 
+  HIGH
   CRITICAL
 }
-
 
 model Session {
   id        String   @id
@@ -146,15 +156,15 @@ model Session {
   ipAddress String?
   userAgent String?
 
-  userId    String
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("session")
 }
 
 model Account {
-  id                    String   @id
+  id                    String    @id
   accountId             String
   providerId            String
   userId                String
@@ -165,8 +175,8 @@ model Account {
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
