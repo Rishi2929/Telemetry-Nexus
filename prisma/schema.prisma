@@ -47,7 +47,8 @@ model Project {
 }
 
 model ApiKey {
-  id String @id @default(cuid())
+  id          String @id @default(cuid())
+  publicId    String @unique
 
   name    String @default("Default")
   keyHash String @unique

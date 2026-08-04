@@ -3,7 +3,7 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/session";
-import { createApiKey, generateApiKey, hashApiKey } from "@/lib/api-key";
+import { createApiKey } from "@/lib/api-key";
 import { cookies } from "next/headers";
 
 export async function createProject(formData: FormData) {
@@ -21,8 +21,7 @@ export async function createProject(formData: FormData) {
     throw new Error("Project name is required");
   }
 
-  const apiKey = generateApiKey();
-  const keyHash = await hashApiKey(apiKey);
+  const { publicId, apiKey, keyHash } = await createApiKey();
 
   const cookieStore = await cookies();
 
@@ -33,6 +32,7 @@ export async function createProject(formData: FormData) {
       ownerId: session.user.id,
       apiKeys: {
         create: {
+          publicId,
           keyHash,
         },
       },
@@ -138,12 +138,14 @@ export async function regenerateApiKey(formData: FormData) {
     throw new Error("API key not found.");
   }
 
-  const { apiKey, keyHash } = await createApiKey();
+  const { publicId, apiKey, keyHash } = await createApiKey();
+
   await prisma.apiKey.update({
     where: {
       id: existingApiKey.id,
     },
     data: {
+      publicId,
       keyHash,
     },
   });

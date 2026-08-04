@@ -1,25 +1,41 @@
 import { randomBytes } from "crypto";
 import argon2 from "argon2";
+import { nanoid } from "nanoid";
+
+export function generatePublicApiKeyId() {
+  return nanoid(10);
+}
 
 export function generateApiKey() {
-  const random = randomBytes(32).toString("hex");
-  return `tn_live_${random}`;
+  const publicId = generatePublicApiKeyId();
+
+  const secret = randomBytes(32).toString("hex");
+
+  const apiKey = `tn_live_${publicId}_${secret}`;
+
+  return {
+    publicId,
+    secret,
+    apiKey,
+  };
 }
 
-export async function hashApiKey(apiKey: string) {
-  return argon2.hash(apiKey);
+export async function hashApiKey(secret: string) {
+  return argon2.hash(secret);
 }
 
-export async function verifyApiKey(apiKey: string, hash: string) {
-  return argon2.verify(hash, apiKey);
+export async function verifyApiKey(secret: string, hash: string) {
+  return argon2.verify(hash, secret);
 }
 
 export async function createApiKey() {
-  const apiKey = generateApiKey();
-  const keyHash = await hashApiKey(apiKey);
+  const { publicId, secret, apiKey } = generateApiKey();
+
+  const keyHash = await hashApiKey(secret);
 
   return {
-    apiKey,
+    publicId,
     keyHash,
+    apiKey,
   };
 }
