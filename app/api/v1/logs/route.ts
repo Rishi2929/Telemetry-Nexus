@@ -1,31 +1,21 @@
+import { authenticateApiKey } from "@/lib/authentication-api-key";
+
 export async function POST(request: Request) {
-  const authorization = request.headers.get("Authorization");
+  try {
+    const apiKey = await authenticateApiKey(request);
 
-  if (!authorization) {
+    return Response.json({
+      authenticated: true,
+      projectId: apiKey.projectId,
+    });
+  } catch (error) {
     return Response.json(
       {
-        error: "Missing Authorization header",
+        error: error instanceof Error ? error.message : "Unauthorized",
       },
       {
         status: 401,
       }
     );
   }
-
-  if (!authorization.startsWith("Bearer ")) {
-    return Response.json(
-      {
-        error: "Invalid Authorization header",
-      },
-      {
-        status: 401,
-      }
-    );
-  }
-
-  const apiKey = authorization.substring(7);
-
-  return Response.json({
-    apiKey,
-  });
 }
