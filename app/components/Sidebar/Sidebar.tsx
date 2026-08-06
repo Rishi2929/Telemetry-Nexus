@@ -4,22 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import {
-  Activity,
-  BellRing,
-  FolderKanban,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Moon,
-  Settings,
-  Terminal,
-  X,
-} from "lucide-react";
+import { Activity, BellRing, FolderKanban, LayoutDashboard, LogOut, Menu, Moon, Settings, Terminal, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/authClient";
-
+import { authClient } from "@/lib/auth/authClient";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -34,8 +22,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   // Lock body scroll while the full-screen mobile menu is open
   useEffect(() => {
@@ -54,9 +41,7 @@ export default function Sidebar() {
         },
       },
     });
-  }
-
-
+  };
 
   const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
     <>
@@ -94,10 +79,9 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
             >
               <Icon className="h-5 w-5" />
               {item.name}
@@ -118,13 +102,10 @@ export default function Sidebar() {
           Theme
         </Button>
 
-
-          <Button type="submit" variant="outline" className="w-full justify-start" onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-
-          </Button>
-
+        <Button type="submit" variant="outline" className="w-full justify-start" onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
       </div>
     </>
   );

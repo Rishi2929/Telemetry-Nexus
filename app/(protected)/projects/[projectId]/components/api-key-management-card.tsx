@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ProjectWithApiKeys } from "@/lib/type";
+import type { ProjectWithApiKeys } from "@/lib/types/type";
 import { RegenerateApiKeyDialog } from "./regenerate-api-key-dialog";
 
 type ApiKeyManagementCardProps = {

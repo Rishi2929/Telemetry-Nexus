@@ -107,9 +107,9 @@ enum LogLevel {
 }
 
 enum Environment {
-  PRODUCTION
-  STAGING
-  DEVELOPMENT
+PRODUCTION
+STAGING
+DEVELOPMENT
 }
 
 enum Method {

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DeleteProjectDialog } from "./delete-project-dialog";
-import type { ProjectWithApiKeys } from "@/lib/type";
+import type { ProjectWithApiKeys } from "@/lib/types/type";
 
 type ProjectDetailsCardProps = {
   project: ProjectWithApiKeys;

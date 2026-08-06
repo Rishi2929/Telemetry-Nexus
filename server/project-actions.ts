@@ -1,9 +1,9 @@
 "use server";
 
 import { notFound, redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "@/lib/session";
-import { createApiKey } from "@/lib/api-key";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "@/lib/auth/session";
+import { createApiKey } from "@/lib/auth/api-key";
 import { cookies } from "next/headers";
 
 export async function createProject(formData: FormData) {

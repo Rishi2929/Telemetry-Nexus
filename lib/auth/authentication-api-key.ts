@@ -1,6 +1,6 @@
 import type { ApiKey } from "@/app/generated/prisma/client";
 import { verifyApiKey } from "./api-key";
-import { prisma } from "./prisma";
+import { prisma } from "../db/prisma";
 
 export async function authenticateApiKey(request: Request): Promise<ApiKey> {
   const authorization = request.headers.get("Authorization");

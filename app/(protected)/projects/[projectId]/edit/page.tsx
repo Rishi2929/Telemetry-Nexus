@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "@/lib/session";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "@/lib/auth/session";
 
 import { ProjectEditForm } from "./components/project-edit-form";
 

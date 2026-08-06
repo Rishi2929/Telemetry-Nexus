@@ -1,19 +1,15 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import Sidebar from "../components/Sidebar/Sidebar";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  
+
   // console.log(session)
-  if(!session){
+  if (!session) {
     redirect("/login");
   }
   return (
@@ -21,9 +17,7 @@ export default async function DashboardLayout({
       <Sidebar />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-7xl p-6">
-          {children}
-        </div>
+        <div className="mx-auto max-w-7xl p-6">{children}</div>
       </main>
     </div>
   );

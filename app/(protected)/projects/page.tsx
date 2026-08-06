@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "@/lib/session";
+import { prisma } from "@/lib/db/prisma";
+import { getServerSession } from "@/lib/auth/session";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { ProjectsList } from "./[projectId]/components/project-list";
