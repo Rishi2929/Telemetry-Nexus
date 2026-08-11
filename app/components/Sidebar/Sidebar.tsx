@@ -113,16 +113,16 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="flex h-16 items-center justify-between border-b bg-background px-4 lg:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border bg-primary/10">
-            <Terminal className="h-4 w-4 text-primary" />
+      <div className="flex h-16 w-full items-center justify-between border-b bg-background px-4 lg:hidden">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg border">
+            <Terminal className="h-5 w-5" />
           </div>
-          <span className="font-mono text-base font-bold">
-            Telemetry
-            <span className="text-primary">Nexus</span>
+
+          <span className="text-lg font-semibold">
+            Telemetry<span className="text-primary">Nexus</span>
           </span>
-        </Link>
+        </div>
 
         <button
           type="button"
@@ -136,7 +136,7 @@ export default function Sidebar() {
 
       {/* Mobile full-screen menu */}
       {open && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden">
+        <div className="fixed inset-0 z-50 flex h-screen w-full flex-col bg-background lg:hidden">
           <SidebarContent onNavigate={() => setOpen(false)} />
         </div>
       )}

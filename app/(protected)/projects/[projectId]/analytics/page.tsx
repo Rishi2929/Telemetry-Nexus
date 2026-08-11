@@ -2,6 +2,10 @@ import { getServerSession } from "@/lib/auth/session";
 import { getProjectAnalytics } from "@/lib/db/analytics";
 import { prisma } from "@/lib/db/prisma";
 import { notFound, redirect } from "next/navigation";
+import { AnalyticsSummary } from "./components/analytics-summary";
+import { StatusChart } from "./components/status-chart";
+import { EndpointTable } from "./components/endpoint-table";
+import { MethodChart } from "./components/method-chart";
 
 type Props = {
   params: Promise<{ projectId: string }>;
@@ -30,8 +34,28 @@ export default async function AnalyticsPage({ params }: Props) {
   const analytics = await getProjectAnalytics(project?.id);
 
   return (
-    <>
-      <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words">{JSON.stringify(analytics, null, 2)}</pre>
-    </>
+    <div className="min-w-0 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Analytics</h1>
+
+        <p className="text-muted-foreground">Monitor your project's API performance.</p>
+      </div>
+
+      <AnalyticsSummary
+        totalRequests={analytics.totalRequests}
+        totalErrors={analytics.totalErrors}
+        errorRate={analytics.errorRate}
+        averageLatency={analytics.averageLatency}
+      />
+      <EndpointTable endpoints={analytics.endpoints} />
+
+      <MethodChart data={analytics.methods} />
+
+      <div className="grid min-w-0 gap-6 lg:grid-cols-2">
+        <StatusChart data={analytics.statusCodes} />
+
+        {/* Method chart later */}
+      </div>
+    </div>
   );
 }

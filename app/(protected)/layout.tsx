@@ -13,12 +13,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="flex min-h-screen w-full">
-      <Sidebar />
+    <div className="min-h-screen w-full">
+      <div className="hidden lg:flex">
+        <Sidebar />
 
-      <main className="min-w-0 flex-1 overflow-x-hidden">
-        <div className="mx-auto w-full max-w-7xl p-6">{children}</div>
-      </main>
+        <main className="min-w-0 flex-1">
+          <div className="mx-auto w-full max-w-7xl p-6">{children}</div>
+        </main>
+      </div>
+
+      <div className="lg:hidden">
+        <Sidebar />
+
+        <main className="min-w-0 w-full">
+          <div className="w-full p-4">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }
