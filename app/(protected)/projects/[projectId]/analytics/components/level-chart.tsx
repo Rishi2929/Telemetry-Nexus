@@ -1,37 +1,37 @@
 "use client";
 
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Props = {
   data: {
-    date: string;
+    level: string;
     count: number;
   }[];
 };
 
-export function RequestChart({ data }: Props) {
+export function LevelChart({ data }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Requests Over Time</CardTitle>
+        <CardTitle>Log Levels</CardTitle>
       </CardHeader>
 
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
 
-              <XAxis dataKey="date" />
+              <XAxis dataKey="level" />
 
               <YAxis />
 
               <Tooltip />
 
-              <Line type="monotone" dataKey="count" name="Requests" strokeWidth={2} />
-            </LineChart>
+              <Bar dataKey="count" name="Logs" />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

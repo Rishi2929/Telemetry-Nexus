@@ -1,8 +1,12 @@
 import { notFound } from "next/navigation";
+
 import { prisma } from "@/lib/db/prisma";
 import { getServerSession } from "@/lib/auth/session";
+import { getProjectAnalytics } from "@/lib/db/analytics";
+
 import { ApiKeyManagementCard } from "./components/api-key-management-card";
 import { ProjectDetailsCard } from "./components/project-details-card";
+import { AnalyticsSummary } from "./analytics/components/analytics-summary";
 
 type ProjectOverviewPageProps = {
   params: Promise<{ projectId: string }>;
@@ -31,10 +35,20 @@ export default async function ProjectOverviewPage({ params }: ProjectOverviewPag
     notFound();
   }
 
+  const analytics = await getProjectAnalytics(project.id);
+
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
+      <AnalyticsSummary
+        totalRequests={analytics.totalRequests}
+        totalErrors={analytics.totalErrors}
+        errorRate={analytics.errorRate}
+        averageLatency={analytics.averageLatency}
+      />
+
       <ProjectDetailsCard project={project} />
-      <ApiKeyManagementCard projectId={projectId} apiKey={project.apiKeys[0]} />{" "}
+
+      <ApiKeyManagementCard projectId={projectId} apiKey={project.apiKeys[0]} />
     </div>
   );
 }

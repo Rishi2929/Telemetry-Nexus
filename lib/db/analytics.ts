@@ -105,6 +105,20 @@ async function fetchRecentLogs(projectId: string): Promise<ApiLogRow[]> {
   });
 }
 
+function getRequestByDay(logs: ApiLogRow[]) {
+  const counts = logs.reduce<Record<string, number>>((acc, log) => {
+    const date = log.createdAt.toISOString().split("T")[0];
+
+    acc[date] = (acc[date] ?? 0) + 1;
+
+    return acc;
+  }, {});
+
+  return Object.entries(counts)
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
 export async function getProjectAnalytics(projectId: string) {
   const logs = await fetchRecentLogs(projectId);
 
@@ -129,5 +143,6 @@ export async function getProjectAnalytics(projectId: string) {
     })),
 
     endpoints: getEndpointStats(logs),
+    requestsByDay: getRequestByDay(logs),
   };
 }

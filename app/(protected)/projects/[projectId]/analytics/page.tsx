@@ -6,6 +6,8 @@ import { AnalyticsSummary } from "./components/analytics-summary";
 import { StatusChart } from "./components/status-chart";
 import { EndpointTable } from "./components/endpoint-table";
 import { MethodChart } from "./components/method-chart";
+import { RequestChart } from "./components/request-chart";
+import { LevelChart } from "./components/level-chart";
 
 type Props = {
   params: Promise<{ projectId: string }>;
@@ -54,7 +56,8 @@ export default async function AnalyticsPage({ params }: Props) {
       <div className="grid min-w-0 gap-6 lg:grid-cols-2">
         <StatusChart data={analytics.statusCodes} />
 
-        {/* Method chart later */}
+        <RequestChart data={analytics.requestsByDay} />
+        <LevelChart data={analytics.levels} />
       </div>
     </div>
   );
