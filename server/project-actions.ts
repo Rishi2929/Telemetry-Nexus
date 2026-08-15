@@ -6,39 +6,20 @@ import { getServerSession } from "@/lib/auth/session";
 import { createApiKey } from "@/lib/auth/api-key";
 import { cookies } from "next/headers";
 
-export async function createProject(formData: FormData) {
-  const session = await getServerSession();
-
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-  console.log("Session ID: ", session.user.id);
-
-  const name = formData.get("name")?.toString().trim() ?? "";
-  const description = formData.get("description")?.toString().trim() ?? "";
-
-  if (!name) {
-    throw new Error("Project name is required");
-  }
-
+async function generateAndAttachApiKey(projectId: string) {
   const { publicId, apiKey, keyHash } = await createApiKey();
 
-  const cookieStore = await cookies();
-
-  const project = await prisma.project.create({
+  // 1. Create the API key record linked to the given project
+  const createdApiKey = await prisma.apiKey.create({
     data: {
-      name,
-      description: description || null,
-      ownerId: session.user.id,
-      apiKeys: {
-        create: {
-          publicId,
-          keyHash,
-        },
-      },
+      projectId,
+      publicId,
+      keyHash,
     },
   });
 
+  // 2. Set the cookie for temporary client-side display
+  const cookieStore = await cookies();
   cookieStore.set("new-api-key", apiKey, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -47,6 +28,36 @@ export async function createProject(formData: FormData) {
     path: "/",
   });
 
+  return createdApiKey;
+}
+
+export async function createProject(formData: FormData) {
+  const session = await getServerSession();
+
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const name = formData.get("name")?.toString().trim() ?? "";
+  const description = formData.get("description")?.toString().trim() ?? "";
+
+  if (!name) {
+    throw new Error("Project name is required");
+  }
+
+  // 1. Create the project record
+  const project = await prisma.project.create({
+    data: {
+      name,
+      description: description || null,
+      ownerId: session.user.id,
+    },
+  });
+
+  // 2. Delegate key generation, DB creation, and cookie setting
+  await generateAndAttachApiKey(project.id);
+
+  // 3. Redirect to reveal page
   redirect(`/projects/${project.id}/api-key`);
 }
 

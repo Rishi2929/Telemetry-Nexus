@@ -3,6 +3,17 @@ import type { Request, Response, NextFunction } from "express";
 import type { MonitorOptions, TelemetryPayload } from "./types";
 import { sendTelemetry } from "./sender";
 
+function getLogLevel(statusCode: number): TelemetryPayload["level"] {
+  if (statusCode >= 500) {
+    return "ERROR";
+  }
+  if (statusCode >= 400) {
+    return "WARN";
+  }
+
+  return "INFO";
+}
+
 export function monitor(options: MonitorOptions) {
   return function telemetryMiddleware(request: Request, response: Response, next: NextFunction) {
     const startTime = Date.now();
@@ -11,7 +22,7 @@ export function monitor(options: MonitorOptions) {
       const latency = Date.now() - startTime;
 
       const telemetry: TelemetryPayload = {
-        level: "INFO",
+        level: getLogLevel(response.statusCode),
 
         message: `${request.method} ${request.originalUrl}`,
 
