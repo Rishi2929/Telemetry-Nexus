@@ -9,10 +9,6 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/authClient";
 import { useRouter } from "next/navigation";
 
-const initialState = {
-  error: "",
-};
-
 export function SignupForm() {
   const router = useRouter();
 
@@ -21,6 +17,7 @@ export function SignupForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setPending(true);
     setError("");
 
@@ -31,6 +28,7 @@ export function SignupForm() {
     const password = formData.get("password")?.toString() ?? "";
     const confirmPassword = formData.get("confirm-password")?.toString() ?? "";
 
+    // Client-side validation
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       setPending(false);
@@ -42,19 +40,20 @@ export function SignupForm() {
         name,
         email,
         password,
-        callbackURL: "/",
+        callbackURL: "/dashboard",
       });
-      // console.log(result);
 
+      // Dynamic Better Auth error
       if (error) {
-        setError(error.message ?? "Unable to create account.");
-        setPending(false);
+        setError(error.message || "Unable to create account.");
         return;
       }
+
       router.push("/dashboard");
       router.refresh();
-    } catch {
-      setError("Something went wrong");
+    } catch (error) {
+      console.error("Signup error:", error);
+      setError("Something went wrong. Please try again.");
     } finally {
       setPending(false);
     }
@@ -96,7 +95,7 @@ export function SignupForm() {
 
             {error && <FieldDescription className="text-destructive">{error}</FieldDescription>}
 
-            <Button type="submit" disabled={pending} className="w-full">
+            <Button type="submit" disabled={pending} className="w-full cursor-pointer">
               {pending ? "Creating account..." : "Create Account"}
             </Button>
 

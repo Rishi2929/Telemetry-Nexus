@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -9,35 +9,68 @@ import { Activity, BellRing, FolderKanban, LayoutDashboard, LogOut, Menu, Moon, 
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/authClient";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Projects", href: "/projects", icon: FolderKanban },
-  { name: "Analytics", href: "/analytics", icon: Activity },
-  { name: "Incidents", href: "/incidents", icon: BellRing },
-  { name: "Settings", href: "/settings", icon: Settings },
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "Projects",
+    href: "/projects",
+    icon: FolderKanban,
+  },
+  {
+    name: "Analytics",
+    href: "/analytics",
+    icon: Activity,
+  },
+  {
+    name: "Incidents",
+    href: "/incidents",
+    icon: BellRing,
+  },
+  {
+    name: "Settings",
+    href: "/settings",
+    icon: Settings,
+  },
 ];
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
+
   const [open, setOpen] = useState(false);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
-  // Lock body scroll while the full-screen mobile menu is open
+  // Lock body scroll while mobile menu is open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+
     return () => {
       document.body.style.overflow = "";
     };
   }, [open]);
 
   const handleLogout = async () => {
-    await authClient.signOut();
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/login"); // redirect to login page
+          router.push("/login");
         },
       },
     });
@@ -47,17 +80,18 @@ export default function Sidebar() {
     <>
       {/* Logo */}
       <div className="flex h-16 items-center justify-between border-b px-5">
-        <Link href="/dashboard" className="flex items-center gap-3" onClick={onNavigate}>
+        <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg border bg-primary/10">
             <Terminal className="h-5 w-5 text-primary" />
           </div>
+
           <span className="font-mono text-lg font-bold">
             Telemetry
             <span className="text-primary">Nexus</span>
           </span>
         </Link>
 
-        {/* Close button, mobile full-screen menu only */}
+        {/* Mobile close button */}
         <button
           type="button"
           onClick={onNavigate}
@@ -78,6 +112,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               onClick={onNavigate}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -96,16 +131,33 @@ export default function Sidebar() {
           <p className="text-sm font-semibold">Rishi Singh</p>
           <p className="text-xs text-muted-foreground">rishi@example.com</p>
         </div>
-
-        <Button variant="outline" className="w-full justify-start">
+        <Button variant="outline" className="w-full justify-start cursor-pointer">
           <Moon className="mr-2 h-4 w-4" />
           Theme
         </Button>
+        {/* LogOut Btn and Popup */}
+        <AlertDialog>
+          <AlertDialogTrigger render={<Button type="button" variant="outline" className="w-full justify-start cursor-pointer" />}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </AlertDialogTrigger>
 
-        <Button type="submit" variant="outline" className="w-full justify-start" onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+
+              <AlertDialogDescription>
+                You will be signed out of your Telemetry Nexus account and redirected to the login page.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+              <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </>
   );
@@ -114,15 +166,16 @@ export default function Sidebar() {
     <>
       {/* Mobile top bar */}
       <div className="flex h-16 w-full items-center justify-between border-b bg-background px-4 lg:hidden">
-        <div className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg border">
             <Terminal className="h-5 w-5" />
           </div>
 
           <span className="text-lg font-semibold">
-            Telemetry<span className="text-primary">Nexus</span>
+            Telemetry
+            <span className="text-primary">Nexus</span>
           </span>
-        </div>
+        </Link>
 
         <button
           type="button"

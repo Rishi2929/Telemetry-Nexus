@@ -9,6 +9,12 @@ import { ProjectsList } from "./[projectId]/components/project-list";
 export default async function ProjectsPage() {
   const session = await getServerSession();
 
+  // await new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     resolve("Intentional delay");
+  //   }, 3000);
+  // });
+
   if (!session) {
     throw new Error("Unauthorized");
   }
