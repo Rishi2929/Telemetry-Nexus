@@ -1,14 +1,25 @@
 import { LogLevel, Method } from "@/app/generated/prisma/enums";
 import { LogSchema } from "../validation/log-schema";
 import { prisma } from "./prisma";
+import { detectIncident } from "./incidents";
 
 export async function createApiLog(projectId: string, data: LogSchema) {
-  return prisma.apiLog.create({
+  const log = await prisma.apiLog.create({
     data: {
       projectId,
       ...data,
     },
   });
+
+  await detectIncident({
+    projectId: log.projectId,
+    endpoint: log.endpoint,
+    statusCode: log.statusCode,
+    latency: log.latency,
+    createdAt: log.createdAt,
+  });
+
+  return log;
 }
 
 type GetProjectLogsOptions = {
@@ -25,16 +36,20 @@ export async function getProjectLogs(projectId: string, options?: GetProjectLogs
       ...(options?.level && {
         level: options.level,
       }),
+
       ...(options?.method && {
         method: options.method,
       }),
+
       ...(options?.statusCode && {
         statusCode: options.statusCode,
       }),
     },
+
     orderBy: {
       createdAt: "desc",
     },
+
     take: 50,
   });
 }

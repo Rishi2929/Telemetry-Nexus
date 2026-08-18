@@ -128,8 +128,13 @@ model Incident {
 
   severity Severity
 
+  endpoint String?
+
   resolved   Boolean   @default(false)
   resolvedAt DateTime?
+
+  occurrenceCount Int      @default(1)
+  lastSeenAt      DateTime @default(now())
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)

@@ -8,7 +8,7 @@ const ENDPOINTS = [
   // Successful requests
   { path: "/fast", method: "GET", weight: 20 },
   { path: "/slow", method: "GET", weight: 10 },
-  { path: "/very-slow", method: "GET", weight: 5 },
+  { path: "/very-slow", method: "GET", weight: 15 },
 
   // 4xx errors
   { path: "/not-found", method: "GET", weight: 8 },
@@ -17,8 +17,8 @@ const ENDPOINTS = [
   { path: "/bad-request", method: "GET", weight: 3 },
 
   // 5xx errors
-  { path: "/server-error", method: "GET", weight: 3 },
-  { path: "/service-unavailable", method: "GET", weight: 2 },
+  { path: "/server-error", method: "GET", weight: 10 },
+  { path: "/service-unavailable", method: "GET", weight: 10 },
 ];
 
 function weightedSelect<T extends { weight: number }>(items: T[]): T {

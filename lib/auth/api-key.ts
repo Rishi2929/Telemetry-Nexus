@@ -1,9 +1,11 @@
 import { randomBytes } from "crypto";
 import argon2 from "argon2";
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
+
+const generatePublicId = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 10);
 
 export function generatePublicApiKeyId() {
-  return nanoid(10);
+  return generatePublicId();
 }
 
 export function generateApiKey() {
