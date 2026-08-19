@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 type Incident = {
   id: string;
@@ -37,7 +38,9 @@ export function IncidentList({ incidents }: IncidentListProps) {
               <div key={incident.id} className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-medium">{incident.title}</h3>
+                    <Link href={`/incidents/${incident.id}`}>
+                      <h3 className="font-medium">{incident.title}</h3>
+                    </Link>
 
                     <Badge variant="outline">{incident.severity}</Badge>
 

@@ -44,6 +44,8 @@ model Project {
   incidents Incident[]
 
   @@index([ownerId])
+
+  alertRules AlertRule[]
 }
 
 model ApiKey {
@@ -144,6 +146,35 @@ model Incident {
 
   @@index([projectId])
   @@index([resolved])
+}
+
+model AlertRule{
+    id            String @id @default(cuid())
+    
+    name          String
+    description   String?
+    
+    enabled Boolean @default(true)
+    
+    metric    AlertMetric
+    threshold Float
+    duration  Int?
+    
+    severity Severity
+    
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    
+    @@index([projectId])
+    @@index([projectId, enabled])
+}
+
+enum AlertMetric {
+  ERROR_RATE
+  LATENCY
 }
 
 enum Severity {

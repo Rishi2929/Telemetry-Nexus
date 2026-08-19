@@ -1,7 +1,7 @@
 import { LogLevel, Method } from "@/app/generated/prisma/enums";
 import { LogSchema } from "../validation/log-schema";
 import { prisma } from "./prisma";
-import { detectIncident } from "./incidents";
+import { evaluateAlertRules } from "@/lib/services/incident-engine";
 
 export async function createApiLog(projectId: string, data: LogSchema) {
   const log = await prisma.apiLog.create({
@@ -11,7 +11,7 @@ export async function createApiLog(projectId: string, data: LogSchema) {
     },
   });
 
-  await detectIncident({
+  await evaluateAlertRules({
     projectId: log.projectId,
     endpoint: log.endpoint,
     statusCode: log.statusCode,

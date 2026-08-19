@@ -91,3 +91,54 @@ export async function getUserIncidents(userId: string) {
     },
   });
 }
+
+export async function getIncident(incidentId: string, userId: string) {
+  return prisma.incident.findFirst({
+    where: {
+      id: incidentId,
+      project: {
+        ownerId: userId,
+      },
+    },
+    include: {
+      project: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+}
+
+export async function resolveIncident(incidentId: string, userId: string) {
+  return prisma.incident.updateMany({
+    where: {
+      id: incidentId,
+      project: {
+        ownerId: userId,
+      },
+      resolved: false,
+    },
+    data: {
+      resolved: true,
+      resolvedAt: new Date(),
+    },
+  });
+}
+
+export async function reopenIncident(incidentId: string, userId: string) {
+  return prisma.incident.updateMany({
+    where: {
+      id: incidentId,
+      project: {
+        ownerId: userId,
+      },
+      resolved: true,
+    },
+    data: {
+      resolved: false,
+      resolvedAt: null,
+    },
+  });
+}

@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
-
 import { prisma } from "@/lib/db/prisma";
 import { getServerSession } from "@/lib/auth/session";
 import { getProjectAnalytics } from "@/lib/db/analytics";
-
 import { ApiKeyManagementCard } from "./components/api-key-management-card";
 import { ProjectDetailsCard } from "./components/project-details-card";
 import { AnalyticsSummary } from "./analytics/components/analytics-summary";

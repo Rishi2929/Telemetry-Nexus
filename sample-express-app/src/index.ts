@@ -6,7 +6,7 @@ const PORT = 3001;
 
 app.use(
   monitor({
-    apiKey: "tn_live_RomoVRhLDb_d5ada7a5e81b31434a939ec8eb1cd580e8594acb33ce560faab4089002b45019",
+    apiKey: "tn_live_6cBOuEpuLU_2d1de2ebe34b490ba1c2048c031e47b3e8713c5da1652ea23a1370951dec17d6",
     endpoint: "http://localhost:3000/api/v1/logs",
   }),
 );

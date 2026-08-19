@@ -26,6 +26,9 @@ export default async function ProjectLayout({ children, params }: Props) {
         <Button variant="ghost">
           <Link href={`/projects/${projectId}/analytics`}>Analytics</Link>
         </Button>
+        <Button variant="ghost">
+          <Link href={`/projects/${projectId}/alerts`}>Alerts</Link>
+        </Button>
       </div>
 
       {children}
