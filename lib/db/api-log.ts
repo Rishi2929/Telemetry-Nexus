@@ -17,6 +17,7 @@ export async function createApiLog(projectId: string, data: LogSchema) {
     statusCode: log.statusCode,
     latency: log.latency,
     createdAt: log.createdAt,
+    apiLogId: log.id,
   });
 
   return log;

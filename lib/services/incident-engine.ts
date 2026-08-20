@@ -6,9 +6,10 @@ type EvaluateIncidentInput = {
   statusCode: number;
   latency: number;
   createdAt: Date;
+  apiLogId: string;
 };
 
-export async function evaluateAlertRules({ projectId, endpoint, statusCode, latency, createdAt }: EvaluateIncidentInput) {
+export async function evaluateAlertRules({ projectId, endpoint, statusCode, latency, createdAt, apiLogId }: EvaluateIncidentInput) {
   const rules = await prisma.alertRule.findMany({
     where: {
       projectId,
@@ -57,6 +58,15 @@ export async function evaluateAlertRules({ projectId, endpoint, statusCode, late
 
         description = `Error rate reached ${errorRate.toFixed(1)}% in the last 5 minutes. Threshold: ${rule.threshold}%.`;
       }
+
+      /*
+       * The project-wide error-rate condition may be triggered,
+       * but this particular request only becomes an occurrence
+       * if THIS request is itself a 5xx error.
+       */
+      if (triggered && statusCode < 500) {
+        continue;
+      }
     }
 
     if (!triggered) {
@@ -75,8 +85,10 @@ export async function evaluateAlertRules({ projectId, endpoint, statusCode, late
       },
     });
 
+    let incident;
+
     if (existingIncident) {
-      await prisma.incident.update({
+      incident = await prisma.incident.update({
         where: {
           id: existingIncident.id,
         },
@@ -88,24 +100,34 @@ export async function evaluateAlertRules({ projectId, endpoint, statusCode, late
           updatedAt: createdAt,
         },
       });
-      continue;
+    } else {
+      incident = await prisma.incident.create({
+        data: {
+          title: rule.name,
+          description,
+          severity: rule.severity,
+          endpoint: rule.metric === "LATENCY" ? endpoint : null,
+          projectId,
+          resolved: false,
+          occurrenceCount: 1,
+          lastSeenAt: createdAt,
+          createdAt,
+        },
+      });
+
+      createdIncidents.push(incident);
     }
 
-    const incident = await prisma.incident.create({
+    await prisma.incidentOccurrence.create({
       data: {
-        title: rule.name,
-        description,
-        severity: rule.severity,
-        endpoint: rule.metric === "LATENCY" ? endpoint : null,
-        projectId,
-        resolved: false,
-        occurrenceCount: 1,
-        lastSeenAt: createdAt,
-        createdAt,
+        incidentId: incident.id,
+        apiLogId,
+        endpoint,
+        statusCode,
+        latency,
+        occurredAt: createdAt,
       },
     });
-
-    createdIncidents.push(incident);
   }
 
   return createdIncidents;

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getServerSession } from "@/lib/auth/session";
-import { getUserIncidents } from "@/lib/db/incidents";
+import { getIncident, getUserIncidents } from "@/lib/db/incidents";
 import { IncidentStats } from "./components/IncidentStats";
 import { IncidentList } from "./components/IncidentList";
 

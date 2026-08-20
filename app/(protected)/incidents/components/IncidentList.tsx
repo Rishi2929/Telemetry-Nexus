@@ -35,33 +35,37 @@ export function IncidentList({ incidents }: IncidentListProps) {
         ) : (
           <div className="space-y-4">
             {incidents.map((incident) => (
-              <div key={incident.id} className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link href={`/incidents/${incident.id}`}>
+              <Link
+                key={incident.id}
+                href={`/incidents/${incident.id}`}
+                className="block rounded-lg border p-4 transition-colors hover:bg-muted/50"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-medium">{incident.title}</h3>
-                    </Link>
 
-                    <Badge variant="outline">{incident.severity}</Badge>
+                      <Badge variant="outline">{incident.severity}</Badge>
 
-                    <Badge variant={incident.resolved ? "outline" : "destructive"}>{incident.resolved ? "Resolved" : "Open"}</Badge>
+                      <Badge variant={incident.resolved ? "outline" : "destructive"}>{incident.resolved ? "Resolved" : "Open"}</Badge>
+                    </div>
+
+                    <p className="mt-1 text-sm text-muted-foreground">{incident.project.name}</p>
+
+                    {incident.endpoint && <p className="mt-1 truncate font-mono text-sm text-muted-foreground">{incident.endpoint}</p>}
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary">
+                        {incident.occurrenceCount} {incident.occurrenceCount === 1 ? "occurrence" : "occurrences"}
+                      </Badge>
+
+                      <span className="text-xs text-muted-foreground">Last detected {incident.lastSeenAt.toLocaleString()}</span>
+                    </div>
                   </div>
 
-                  <p className="mt-1 text-sm text-muted-foreground">{incident.project.name}</p>
-
-                  {incident.endpoint && <p className="mt-1 truncate font-mono text-sm text-muted-foreground">{incident.endpoint}</p>}
-
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <Badge variant="secondary">
-                      {incident.occurrenceCount} {incident.occurrenceCount === 1 ? "occurrence" : "occurrences"}
-                    </Badge>
-
-                    <span className="text-xs text-muted-foreground">Last detected {incident.lastSeenAt.toLocaleString()}</span>
-                  </div>
+                  <div className="shrink-0 text-sm text-muted-foreground">{incident.createdAt.toLocaleString()}</div>
                 </div>
-
-                <div className="shrink-0 text-sm text-muted-foreground">{incident.createdAt.toLocaleString()}</div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

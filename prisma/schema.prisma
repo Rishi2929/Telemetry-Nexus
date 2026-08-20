@@ -93,6 +93,9 @@ model ApiLog {
 
   metadata Json?
 
+  incidentOccurrences IncidentOccurrence[]
+
+
   createdAt DateTime @default(now())
 
   @@index([projectId, createdAt])
@@ -144,8 +147,34 @@ model Incident {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  occurrences IncidentOccurrence[]
+
+
   @@index([projectId])
   @@index([resolved])
+}
+
+model IncidentOccurrence {
+  id            String  @id @default(cuid())
+
+  incidentId    String
+  incident      Incident @relation(fields: [incidentId],references: [id],onDelete: Cascade)
+
+  apiLogId      String
+  apiLog        ApiLog @relation(fields: [apiLogId],references: [id],onDelete: Cascade)        
+
+  endpoint      String
+  statusCode    Int
+  latency       Int
+  occurredAt    DateTime
+
+  createdAt     DateTime @default(now()) 
+
+  @@unique([incidentId, apiLogId])
+  @@index([incidentId])
+  @@index([endpoint])
+  @@index([occurredAt])
+
 }
 
 model AlertRule{
