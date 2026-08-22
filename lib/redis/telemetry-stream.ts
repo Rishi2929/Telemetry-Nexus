@@ -18,6 +18,10 @@ type TelemetryStreamData = {
   createdAt: string;
 };
 
+export async function getTelemetryStreamLength() {
+  return redis.xlen(TELEMETRY_STREAM);
+}
+
 export async function publishTelemetry(data: TelemetryStreamData) {
   await redis.xadd(TELEMETRY_STREAM, "*", "data", JSON.stringify(data));
 }
