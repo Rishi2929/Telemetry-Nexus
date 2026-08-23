@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { logSchema } from "@/lib/validation/log-schema";
 import { createApiLog } from "@/lib/db/api-log";
 import { authenticateApiKey } from "@/lib/auth/authentication-api-key";
+import { publishTelemetry } from "@/lib/redis/telemetry-stream";
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +13,11 @@ export async function POST(request: Request) {
 
     const data = logSchema.parse(body);
 
-    await createApiLog(apiKey.projectId, data);
+    await publishTelemetry({
+      projectId: apiKey.projectId,
+      ...data,
+      createdAt: new Date().toISOString(),
+    });
 
     return Response.json(
       {
@@ -20,7 +25,7 @@ export async function POST(request: Request) {
       },
       {
         status: 201,
-      }
+      },
     );
   } catch (error) {
     if (error instanceof ZodError) {
@@ -30,7 +35,7 @@ export async function POST(request: Request) {
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -41,7 +46,7 @@ export async function POST(request: Request) {
         },
         {
           status: 401,
-        }
+        },
       );
     }
 
@@ -51,7 +56,7 @@ export async function POST(request: Request) {
       },
       {
         status: 500,
-      }
+      },
     );
   }
 }
