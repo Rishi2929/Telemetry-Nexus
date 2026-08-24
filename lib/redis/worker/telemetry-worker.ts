@@ -4,7 +4,7 @@ import { TELEMETRY_STREAM } from "@/lib/redis/telemetry-stream";
 import { processTelemetryBatch } from "@/lib/services/telemetry-batch-processor";
 import { Prisma } from "@/app/generated/prisma/client";
 
-let lastId = "0-0";
+let lastId = "$";
 const BATCH_SIZE = 500;
 const BATCH_TIMEOUT = 2000;
 

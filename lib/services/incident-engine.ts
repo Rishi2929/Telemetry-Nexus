@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 
-type EvaluateIncidentInput = {
+export type EvaluateIncidentInput = {
   projectId: string;
   endpoint: string;
   statusCode: number;
@@ -16,7 +16,17 @@ export async function evaluateAlertRules({ projectId, endpoint, statusCode, late
       enabled: true,
     },
   });
-
+  console.log(
+    "ALERT RULES:",
+    rules.map((rule) => ({
+      id: rule.id,
+      name: rule.name,
+      metric: rule.metric,
+      threshold: rule.threshold,
+      severity: rule.severity,
+      enabled: rule.enabled,
+    })),
+  );
   if (rules.length === 0) {
     return [];
   }
@@ -24,6 +34,14 @@ export async function evaluateAlertRules({ projectId, endpoint, statusCode, late
   const createdIncidents = [];
 
   for (const rule of rules) {
+    console.log("CHECKING RULE:", {
+      name: rule.name,
+      metric: rule.metric,
+      threshold: rule.threshold,
+      endpoint,
+      statusCode,
+      latency,
+    });
     let triggered = false;
     let description = "";
 
@@ -68,6 +86,12 @@ export async function evaluateAlertRules({ projectId, endpoint, statusCode, late
         continue;
       }
     }
+
+    console.log("RULE RESULT:", {
+      rule: rule.name,
+      metric: rule.metric,
+      triggered,
+    });
 
     if (!triggered) {
       continue;
@@ -131,4 +155,40 @@ export async function evaluateAlertRules({ projectId, endpoint, statusCode, late
   }
 
   return createdIncidents;
+}
+
+type EvaluateIncidentBatchInput = {
+  projectId: string;
+  logs: {
+    id: string;
+    endpoint: string;
+    statusCode: number;
+    latency: number;
+    createdAt: Date;
+  }[];
+};
+
+export async function evaluateAlertRulesBatch({ projectId, logs }: EvaluateIncidentBatchInput) {
+  console.log("Evaluating project:", projectId);
+  console.log("Logs in batch:", logs.length);
+
+  for (const log of logs) {
+    console.log("Evaluating log:", {
+      id: log.id,
+      // projectId: log.projectId,
+      endpoint: log.endpoint,
+      statusCode: log.statusCode,
+      latency: log.latency,
+      createdAt: log.createdAt,
+    });
+
+    await evaluateAlertRules({
+      projectId,
+      endpoint: log.endpoint,
+      statusCode: log.statusCode,
+      latency: log.latency,
+      createdAt: log.createdAt,
+      apiLogId: log.id,
+    });
+  }
 }

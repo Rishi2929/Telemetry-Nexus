@@ -76,6 +76,8 @@ model ApiLog {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   requestId String?
+  batchId   String?
+
 
   level   LogLevel
   message String
@@ -100,6 +102,8 @@ model ApiLog {
 
   @@index([projectId, createdAt])
   @@index([statusCode])
+  @@index([batchId])
+
 }
 
 enum LogLevel {
