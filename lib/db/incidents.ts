@@ -16,7 +16,7 @@ export async function getUserIncidents(userId: string) {
       },
     },
     orderBy: {
-      createdAt: "desc",
+      lastSeenAt: "desc",
     },
   });
 }

@@ -1,3 +1,6 @@
+// This code is responsible for creating a single, reusbalbe Redis database client in Next.js
+// that survives hot reloading during local development without exhausting db connections.
+//
 import Redis from "ioredis";
 
 const globalForRedis = globalThis as unknown as {

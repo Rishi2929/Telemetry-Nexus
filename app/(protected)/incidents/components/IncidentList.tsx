@@ -12,6 +12,7 @@ type Incident = {
   occurrenceCount: number;
   lastSeenAt: Date;
   createdAt: Date;
+  updatedAt: Date;
   project: {
     id: string;
     name: string;
@@ -58,12 +59,23 @@ export function IncidentList({ incidents }: IncidentListProps) {
                       <Badge variant="secondary">
                         {incident.occurrenceCount} {incident.occurrenceCount === 1 ? "occurrence" : "occurrences"}
                       </Badge>
-
-                      <span className="text-xs text-muted-foreground">Last detected {incident.lastSeenAt.toLocaleString()}</span>
                     </div>
                   </div>
+                  <div className="shrink-0 flex flex-col gap-1.5 sm:items-end">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground">Last seen</span>
+                      <Badge variant="outline" className="font-mono text-[11px] font-normal">
+                        {incident.lastSeenAt.toLocaleString()}
+                      </Badge>
+                    </div>
 
-                  <div className="shrink-0 text-sm text-muted-foreground">{incident.createdAt.toLocaleString()}</div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground">Updated</span>
+                      <Badge variant="secondary" className="font-mono text-[11px] font-normal">
+                        {incident.updatedAt.toLocaleString()}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
               </Link>
             ))}

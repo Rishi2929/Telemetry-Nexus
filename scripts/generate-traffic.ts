@@ -1,6 +1,6 @@
 const BASE_URL = "http://localhost:3001";
 
-const TOTAL_REQUESTS = 500;
+const TOTAL_REQUESTS = 50;
 
 const ENDPOINTS = [
   { path: "/", method: "GET", weight: 30 },
