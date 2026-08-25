@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Terminal, LogIn, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const navLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/#pricing" },
+const navigation = [
+  { label: "Features", href: "/features" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Docs", href: "/docs" },
 ];
 
@@ -30,7 +30,7 @@ const Navbar = () => {
 
         {/* Desktop nav links */}
         <nav className="hidden items-center gap-6 md:flex">
-          {navLinks.map((link) => (
+          {navigation.map((link) => (
             <Link key={link.href} href={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
               {link.label}
             </Link>
@@ -65,7 +65,7 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="border-t bg-background px-6 py-4 md:hidden">
           <nav className="flex flex-col gap-4">
-            {navLinks.map((link) => (
+            {navigation.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

@@ -1,6 +1,8 @@
 import { redis } from "./client";
 
 export const TELEMETRY_STREAM = "telemetry";
+export const TELEMETRY_GROUP = "telemetry-workers";
+export const TELEMETRY_CONSUMER = `worker-${process.pid}`;
 
 type TelemetryStreamData = {
   projectId: string;
