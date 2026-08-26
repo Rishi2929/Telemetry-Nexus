@@ -1,8 +1,6 @@
 import { getServerSession } from "@/lib/auth/session";
 import { getDashboardProjects, getDashboardStats, getRecentErrors, getRequestTraffic } from "@/lib/db/dashboard";
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
 import { redirect } from "next/navigation";
 import { ProjectSummary } from "./components/project-summary";
 import { RecentErrors } from "./components/recent-errors";

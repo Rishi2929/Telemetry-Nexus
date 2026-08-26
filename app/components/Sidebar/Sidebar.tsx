@@ -3,64 +3,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-
-import { Activity, BellRing, FolderKanban, LayoutDashboard, LogOut, Menu, Moon, Settings, Terminal, X } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { Menu, Terminal } from "lucide-react";
 import { authClient } from "@/lib/auth/authClient";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "Projects",
-    href: "/projects",
-    icon: FolderKanban,
-  },
-  {
-    name: "Analytics",
-    href: "/analytics",
-    icon: Activity,
-  },
-  {
-    name: "Incidents",
-    href: "/incidents",
-    icon: BellRing,
-  },
-  {
-    name: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
-];
+import { SidebarContent } from "./components/SidebarContent";
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
-
   const [open, setOpen] = useState(false);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
-  // Lock body scroll while mobile menu is open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-
     return () => {
       document.body.style.overflow = "";
     };
@@ -76,127 +31,39 @@ export default function Sidebar() {
     });
   };
 
-  const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
-    <>
-      {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b px-5">
-        <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border bg-primary/10">
-            <Terminal className="h-5 w-5 text-primary" />
-          </div>
-
-          <span className="font-mono text-lg font-bold">
-            Telemetry
-            <span className="text-primary">Nexus</span>
-          </span>
-        </Link>
-
-        {/* Mobile close button */}
-        <button
-          type="button"
-          onClick={onNavigate}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border lg:hidden"
-          aria-label="Close menu"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
-        {navigation.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.href);
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              prefetch={false}
-              onClick={onNavigate}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div className="space-y-3 border-t p-4">
-        <div>
-          <p className="text-sm font-semibold">Rishi Singh</p>
-          <p className="text-xs text-muted-foreground">rishi@example.com</p>
-        </div>
-        <Button variant="outline" className="w-full justify-start cursor-pointer">
-          <Moon className="mr-2 h-4 w-4" />
-          Theme
-        </Button>
-        {/* LogOut Btn and Popup */}
-        <AlertDialog>
-          <AlertDialogTrigger render={<Button type="button" variant="outline" className="w-full justify-start cursor-pointer" />}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </AlertDialogTrigger>
-
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
-
-              <AlertDialogDescription>
-                You will be signed out of your Telemetry Nexus account and redirected to the login page.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-
-              <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </>
-  );
-
   return (
     <>
-      {/* Mobile top bar */}
-      <div className="flex h-16 w-full items-center justify-between border-b bg-background px-4 lg:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg border">
-            <Terminal className="h-5 w-5" />
+      {/* Mobile Bar */}
+      <div className="flex h-16 w-full items-center justify-between border-b border-border/80 bg-card/95 backdrop-blur-md px-4 lg:hidden">
+        <Link href="/dashboard" className="flex items-center gap-2 font-mono">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-emerald-500/30 bg-emerald-500/10">
+            <Terminal className="h-4 w-4 text-emerald-400" />
           </div>
-
-          <span className="text-lg font-semibold">
-            Telemetry
-            <span className="text-primary">Nexus</span>
+          <span className="text-sm font-bold tracking-tight text-foreground">
+            Telemetry<span className="text-emerald-400">Nexus</span>
           </span>
         </Link>
 
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border/80 bg-muted/40 text-foreground"
           aria-label="Open menu"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Mobile full-screen menu */}
+      {/* Mobile Drawer */}
       {open && (
-        <div className="fixed inset-0 z-50 flex h-screen w-full flex-col bg-background lg:hidden">
-          <SidebarContent onNavigate={() => setOpen(false)} />
+        <div className="fixed inset-0 z-50 flex h-screen w-full flex-col bg-card/95 backdrop-blur-md lg:hidden">
+          <SidebarContent onNavigate={() => setOpen(false)} isActive={isActive} onLogout={handleLogout} />
         </div>
       )}
 
-      {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r bg-background lg:flex">
-        <SidebarContent />
+      {/* Desktop Sidebar */}
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border/80 bg-card/95 backdrop-blur-md font-sans lg:flex">
+        <SidebarContent isActive={isActive} onLogout={handleLogout} />
       </aside>
     </>
   );
