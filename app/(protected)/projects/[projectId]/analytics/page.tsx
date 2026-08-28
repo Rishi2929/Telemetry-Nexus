@@ -37,12 +37,6 @@ export default async function AnalyticsPage({ params }: Props) {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Analytics</h1>
-
-        <p className="text-muted-foreground">Monitor your project's API performance.</p>
-      </div>
-
       <AnalyticsSummary
         totalRequests={analytics.totalRequests}
         totalErrors={analytics.totalErrors}
