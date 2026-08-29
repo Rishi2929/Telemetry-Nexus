@@ -1,7 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Network, Terminal, ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Network, Terminal, ChevronLeft, ChevronRight } from "lucide-react";
 
 type EndpointData = {
   endpoint: string;
@@ -12,9 +16,22 @@ type EndpointData = {
 
 type EndpointTableProps = {
   data: EndpointData[];
+  itemsPerPage?: number;
 };
 
-export function EndpointTable({ data }: EndpointTableProps) {
+export function EndpointTable({ data, itemsPerPage = 10 }: EndpointTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(data.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
   return (
     <Card className="relative overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md shadow-xl font-sans text-left">
       <ComponentHeader count={data.length} />
@@ -23,25 +40,65 @@ export function EndpointTable({ data }: EndpointTableProps) {
         {data.length === 0 ? (
           <EmptyEndpointsState />
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-muted/30 font-mono text-[11px] uppercase tracking-wider">
-                <TableRow className="border-border/60 hover:bg-transparent">
-                  <TableHead className="text-muted-foreground font-semibold py-3 pl-5">Endpoint</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold py-3">Total Requests</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold py-3">Errors</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold py-3">Error Rate</TableHead>
-                  <TableHead className="text-muted-foreground font-semibold py-3 pr-5 text-right">Avg Latency</TableHead>
-                </TableRow>
-              </TableHeader>
+          <>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/30 font-mono text-[11px] uppercase tracking-wider">
+                  <TableRow className="border-border/60 hover:bg-transparent">
+                    <TableHead className="text-muted-foreground font-semibold py-3 pl-5">Endpoint</TableHead>
+                    <TableHead className="text-muted-foreground font-semibold py-3">Total Requests</TableHead>
+                    <TableHead className="text-muted-foreground font-semibold py-3">Errors</TableHead>
+                    <TableHead className="text-muted-foreground font-semibold py-3">Error Rate</TableHead>
+                    <TableHead className="text-muted-foreground font-semibold py-3 pr-5 text-right">Avg Latency</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-              <TableBody className="font-mono text-xs">
-                {data.map((item) => (
-                  <EndpointRow key={item.endpoint} data={item} />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                <TableBody className="font-mono text-xs">
+                  {paginatedData.map((item) => (
+                    <EndpointRow key={item.endpoint} data={item} />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center justify-between border-t border-border/60 bg-muted/20 px-5 py-3 font-mono text-xs">
+              <span className="text-muted-foreground text-[11px]">
+                Showing <span className="font-semibold text-foreground">{data.length > 0 ? startIndex + 1 : 0}</span>-
+                <span className="font-semibold text-foreground">{Math.min(startIndex + itemsPerPage, data.length)}</span> of{" "}
+                <span className="font-semibold text-foreground">{data.length}</span> routes
+              </span>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="h-7 px-2 border-border/60 bg-muted/20 text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground disabled:opacity-40"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5 mr-1" />
+                  Prev
+                </Button>
+
+                <span className="text-[11px] text-muted-foreground px-1">
+                  Page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}
+                  <span className="font-semibold text-foreground">{totalPages}</span>
+                </span>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="h-7 px-2 border-border/60 bg-muted/20 text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
@@ -78,7 +135,6 @@ function EndpointRow({ data }: { data: EndpointData }) {
   const errorRate = data.requests > 0 ? (data.errors / data.requests) * 100 : 0;
   const roundedLatency = Math.round(data.averageLatency);
 
-  // Parse Method if available in route name (e.g. "GET /api/v1/users")
   const parts = data.endpoint.trim().split(" ");
   const hasMethod = parts.length > 1 && ["GET", "POST", "PUT", "DELETE", "PATCH"].includes(parts[0].toUpperCase());
   const method = hasMethod ? parts[0].toUpperCase() : null;
