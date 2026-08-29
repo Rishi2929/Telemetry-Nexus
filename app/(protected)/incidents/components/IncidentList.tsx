@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertTriangle, Clock, Layers, ShieldAlert, Terminal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { AlertTriangle, Clock, Layers, ShieldAlert, Terminal, ChevronLeft, ChevronRight } from "lucide-react";
 
 export type Incident = {
   id: string;
@@ -24,26 +26,85 @@ export type Incident = {
 
 type IncidentListProps = {
   incidents: Incident[];
+  pageSize?: number;
 };
 
-export function IncidentList({ incidents }: IncidentListProps) {
+export function IncidentList({ incidents, pageSize = 5 }: IncidentListProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 whenever the underlying incidents array updates/filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [incidents]);
+
   const unresolvedCount = incidents.filter((i) => !i.resolved).length;
+  const totalPages = Math.ceil(incidents.length / pageSize) || 1;
+  const startIndex = (currentPage - 1) * pageSize;
+  const currentIncidents = incidents.slice(startIndex, startIndex + pageSize);
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
 
   return (
-    <Card className="relative overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md shadow-xl font-sans text-left">
-      <ComponentHeader total={incidents.length} openCount={unresolvedCount} />
+    <Card className="relative overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md shadow-xl font-sans text-left flex flex-col justify-between">
+      <div>
+        <ComponentHeader total={incidents.length} openCount={unresolvedCount} />
 
-      <CardContent className="p-5">
-        {incidents.length === 0 ? (
-          <EmptyIncidentState />
-        ) : (
-          <div className="space-y-3">
-            {incidents.map((incident) => (
-              <IncidentItemCard key={incident.id} incident={incident} />
-            ))}
+        <CardContent className="p-5">
+          {incidents.length === 0 ? (
+            <EmptyIncidentState />
+          ) : (
+            <div className="space-y-3">
+              {currentIncidents.map((incident) => (
+                <IncidentItemCard key={incident.id} incident={incident} />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </div>
+
+      {/* Pagination Footer */}
+      {incidents.length > 0 && (
+        <CardFooter className="flex items-center justify-between border-t border-border/60 bg-muted/20 px-5 py-3 font-mono text-xs">
+          <p className="text-[11px] text-muted-foreground">
+            Showing <span className="text-foreground font-semibold">{startIndex + 1}</span>–
+            <span className="text-foreground font-semibold">{Math.min(startIndex + pageSize, incidents.length)}</span> of{" "}
+            <span className="text-foreground font-semibold">{incidents.length}</span> incidents
+          </p>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-muted-foreground mr-2">
+              Page <span className="text-foreground font-semibold">{currentPage}</span> of{" "}
+              <span className="text-foreground font-semibold">{totalPages}</span>
+            </span>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handlePrev}
+              disabled={currentPage === 1}
+              className="h-7 w-7 border-border/80 bg-zinc-900/60 hover:bg-zinc-800 disabled:opacity-40"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className="h-7 w-7 border-border/80 bg-zinc-900/60 hover:bg-zinc-800 disabled:opacity-40"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
           </div>
-        )}
-      </CardContent>
+        </CardFooter>
+      )}
     </Card>
   );
 }
