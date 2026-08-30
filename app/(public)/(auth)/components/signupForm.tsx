@@ -3,11 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+
 import { authClient } from "@/lib/auth/authClient";
+
 import { Terminal, Loader2, AlertCircle, AtSign, KeyRound, User, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 export function SignupForm() {
@@ -17,35 +20,58 @@ export function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setPending(true);
+
     setError("");
+    setEmailError("");
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
-      setPending(false);
       return;
     }
 
+    setPending(true);
+
     try {
-      const { error: signUpError } = await authClient.signUp.email({
+      const result = await authClient.signUp.email({
         name,
         email,
         password,
         callbackURL: "/dashboard",
       });
 
-      if (signUpError) {
-        setError(signUpError.message || "Unable to create account.");
+      console.log("Better Auth signup response:", result);
+
+      if (result.error) {
+        console.log("Better Auth signup error:", result.error);
+        console.log("Error code:", result.error.code);
+        console.log("Error message:", result.error.message);
+
+        const code = result.error.code?.toUpperCase() || "";
+        const message = result.error.message?.toLowerCase() || "";
+
+        if (
+          code === "USER_ALREADY_EXISTS" ||
+          code === "EMAIL_ALREADY_EXISTS" ||
+          message.includes("already exists") ||
+          message.includes("already registered") ||
+          message.includes("user already exists") ||
+          message.includes("email already exists")
+        ) {
+          setEmailError("An account with this email already exists.");
+        } else {
+          setError(result.error.message || "Unable to create account.");
+        }
+
         return;
       }
-
       router.push("/dashboard");
-      router.refresh();
     } catch (err) {
       console.error("Signup error:", err);
       setError("Something went wrong. Please try again.");
@@ -56,7 +82,6 @@ export function SignupForm() {
 
   return (
     <div className="relative w-full max-w-md mx-auto">
-      {/* Ambient Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[220px] bg-emerald-500/10 blur-[110px] pointer-events-none rounded-full" />
 
       <Card className="relative overflow-hidden border border-border/80 bg-card/95 backdrop-blur-md shadow-2xl font-sans text-left">
@@ -71,6 +96,8 @@ export function SignupForm() {
               setName={setName}
               email={email}
               setEmail={setEmail}
+              emailError={emailError}
+              setEmailError={setEmailError}
               password={password}
               setPassword={setPassword}
               confirmPassword={confirmPassword}
@@ -87,10 +114,6 @@ export function SignupForm() {
       </Card>
     </div>
   );
-}
-
-{
-  /* Sub-Components */
 }
 
 function TerminalHeader() {
@@ -124,6 +147,7 @@ function FormHeader() {
   return (
     <div className="space-y-1">
       <h1 className="text-xl font-extrabold tracking-tight text-foreground">Create Account</h1>
+
       <p className="text-xs font-mono text-muted-foreground">Provision developer credentials for real-time API monitoring.</p>
     </div>
   );
@@ -134,6 +158,8 @@ function FormFields({
   setName,
   email,
   setEmail,
+  emailError,
+  setEmailError,
   password,
   setPassword,
   confirmPassword,
@@ -143,6 +169,8 @@ function FormFields({
   setName: (val: string) => void;
   email: string;
   setEmail: (val: string) => void;
+  emailError: string;
+  setEmailError: (val: string) => void;
   password: string;
   setPassword: (val: string) => void;
   confirmPassword: string;
@@ -150,12 +178,12 @@ function FormFields({
 }) {
   return (
     <div className="space-y-3 font-mono text-xs">
-      {/* Full Name */}
       <div className="space-y-1.5">
         <label htmlFor="name" className="text-foreground font-medium flex items-center gap-1.5">
           <User className="h-3.5 w-3.5 text-muted-foreground" />
           Full Name
         </label>
+
         <Input
           id="name"
           name="name"
@@ -169,31 +197,49 @@ function FormFields({
         />
       </div>
 
-      {/* Email Address */}
       <div className="space-y-1.5">
         <label htmlFor="email" className="text-foreground font-medium flex items-center gap-1.5">
           <AtSign className="h-3.5 w-3.5 text-muted-foreground" />
           Email Address
         </label>
+
         <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+
+            if (emailError) {
+              setEmailError("");
+            }
+          }}
           placeholder="developer@company.com"
           required
-          className="text-xs h-10 bg-black/40 border-border/80 focus-visible:ring-emerald-500/40 focus-visible:border-emerald-500 transition-all"
+          aria-invalid={!!emailError}
+          className={`text-xs h-10 bg-black/40 transition-all ${
+            emailError
+              ? "border-rose-500/60 focus-visible:ring-rose-500/30 focus-visible:border-rose-500"
+              : "border-border/80 focus-visible:ring-emerald-500/40 focus-visible:border-emerald-500"
+          }`}
         />
+
+        {emailError && (
+          <div className="flex items-center gap-1.5 text-[10px] text-rose-400 animate-in fade-in-50">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <span>{emailError}</span>
+          </div>
+        )}
       </div>
 
-      {/* Password */}
       <div className="space-y-1.5">
         <label htmlFor="password" className="text-foreground font-medium flex items-center gap-1.5">
           <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
           Password
         </label>
+
         <Input
           id="password"
           name="password"
@@ -207,12 +253,12 @@ function FormFields({
         />
       </div>
 
-      {/* Confirm Password */}
       <div className="space-y-1.5">
         <label htmlFor="confirm-password" className="text-foreground font-medium flex items-center gap-1.5">
           <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
           Confirm Password
         </label>
+
         <Input
           id="confirm-password"
           name="confirm-password"
@@ -253,6 +299,7 @@ function SubmitButton({ pending }: { pending: boolean }) {
       ) : (
         <span className="flex items-center justify-between w-full px-1">
           <span>Create Account</span>
+
           <div className="flex items-center gap-1 text-[10px] opacity-70 bg-black/20 px-1.5 py-0.5 rounded">
             <span>⌘</span>
             <span>↵</span>
