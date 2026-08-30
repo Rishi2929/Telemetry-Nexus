@@ -62,11 +62,12 @@ export default function Sidebar() {
         <div
           className="
             fixed inset-0 z-50
-            flex h-screen w-full flex-col
+            flex flex-col
             overflow-hidden
             bg-card/95 backdrop-blur-md
             lg:hidden
           "
+          style={{ height: "100dvh" }}
         >
           {/* CHANGE:
               Added `overflow-hidden` to prevent the drawer itself from
