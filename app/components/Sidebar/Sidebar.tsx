@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Terminal } from "lucide-react";
+
 import { authClient } from "@/lib/auth/authClient";
 import { SidebarContent } from "./components/SidebarContent";
 
@@ -16,6 +17,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+
     return () => {
       document.body.style.overflow = "";
     };
@@ -39,6 +41,7 @@ export default function Sidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-md border border-emerald-500/30 bg-emerald-500/10">
             <Terminal className="h-4 w-4 text-emerald-400" />
           </div>
+
           <span className="text-sm font-bold tracking-tight text-foreground">
             Telemetry<span className="text-emerald-400">Nexus</span>
           </span>
@@ -56,7 +59,19 @@ export default function Sidebar() {
 
       {/* Mobile Drawer */}
       {open && (
-        <div className="fixed inset-0 z-50 flex h-screen w-full flex-col bg-card/95 backdrop-blur-md lg:hidden">
+        <div
+          className="
+            fixed inset-0 z-50
+            flex h-screen w-full flex-col
+            overflow-hidden
+            bg-card/95 backdrop-blur-md
+            lg:hidden
+          "
+        >
+          {/* CHANGE:
+              Added `overflow-hidden` to prevent the drawer itself from
+              scrolling and allow SidebarContent to control scrolling. */}
+
           <SidebarContent onNavigate={() => setOpen(false)} isActive={isActive} onLogout={handleLogout} />
         </div>
       )}

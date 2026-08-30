@@ -2,7 +2,7 @@ import { Terminal } from "lucide-react";
 
 export function PageLoading() {
   return (
-    <div className="relative flex min-h-[400px] w-full flex-col items-center justify-center space-y-4 overflow-hidden rounded-xl border border-border/40 bg-card/20 p-8 backdrop-blur-sm font-mono text-xs">
+    <div className="relative flex min-h-[400px] w-full flex-col items-center justify-center space-y-4 overflow-hidden rounded-xl border border-border/40 bg-card/20 p-8 font-mono text-xs">
       {/* Background Radial Glow */}
       <div className="absolute left-1/2 top-1/2 -z-10 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[60px]" />
 
