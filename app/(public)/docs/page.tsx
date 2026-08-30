@@ -6,7 +6,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Check, Copy, Search, Menu, X, ChevronRight, Terminal, Layers, Cpu, Wrench, Rocket, AlertTriangle, Server } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Search,
+  Menu,
+  X,
+  ChevronRight,
+  Terminal,
+  Cpu,
+  Wrench,
+  Rocket,
+  AlertTriangle,
+  Server,
+  BookOpen,
+  ArrowUpRight,
+} from "lucide-react";
 
 // Section definitions with sub-links and icons
 const docSections = [
@@ -66,8 +81,8 @@ function CodeBlock({ children }: { children: string }) {
   };
 
   return (
-    <div className="group relative my-3 overflow-hidden rounded-lg border border-border/70 bg-zinc-950 font-mono text-xs text-zinc-100 dark:border-zinc-800">
-      <div className="flex items-center justify-between border-b border-zinc-800/80 bg-zinc-900/60 px-4 py-1.5 text-[11px] text-zinc-400">
+    <div className="group relative my-3 overflow-hidden rounded-lg border border-border/70 bg-black/60 font-mono text-xs text-zinc-100 shadow-md">
+      <div className="flex items-center justify-between border-b border-border/60 bg-muted/30 px-4 py-1.5 text-[11px] text-zinc-400">
         <span className="flex items-center gap-1.5">
           <Terminal className="h-3.5 w-3.5 text-emerald-400" />
           Terminal
@@ -77,7 +92,7 @@ function CodeBlock({ children }: { children: string }) {
         </Button>
       </div>
       <div className="p-4 overflow-x-auto">
-        <pre className="whitespace-pre-wrap leading-relaxed">{children}</pre>
+        <pre className="whitespace-pre-wrap leading-relaxed text-emerald-300/90">{children}</pre>
       </div>
     </div>
   );
@@ -86,7 +101,7 @@ function CodeBlock({ children }: { children: string }) {
 function Step({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
   return (
     <div className="relative pl-8 sm:pl-10 space-y-2 border-l-2 border-border/60 pb-6 last:pb-0 last:border-l-transparent">
-      <div className="absolute -left-[13px] top-0 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background font-mono text-xs font-bold text-emerald-500 shadow-sm">
+      <div className="absolute -left-[13px] top-0 flex h-6 w-6 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 font-mono text-xs font-bold text-emerald-400 shadow-sm">
         {number}
       </div>
       <h3 className="text-base font-semibold text-foreground tracking-tight">{title}</h3>
@@ -142,57 +157,52 @@ export default function DocsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-emerald-500/20 selection:text-emerald-400">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-8">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden h-8 w-8 text-muted-foreground"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </Button>
-
-            <Link href="/" className="flex items-center gap-2 font-mono text-sm font-bold tracking-tight">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              TelemetryNexus
-              <span className="text-xs font-normal text-muted-foreground">/ docs</span>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="hidden items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 py-1 font-mono text-xs text-muted-foreground hover:bg-muted/70 transition-all sm:flex"
-            >
-              <Search className="h-3.5 w-3.5" />
-              <span>Search documentation...</span>
-              <kbd className="rounded border bg-muted px-1.5 text-[10px]">⌘K</kbd>
-            </button>
-
-            <Button size="sm" variant="outline" className="font-mono text-xs h-8">
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
+    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-emerald-500/20 selection:text-emerald-400 font-sans">
+      {/* Mobile Drawer Navigation */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-x-0 top-14 z-30 border-b border-border/60 bg-card/95 backdrop-blur-md px-6 py-6 md:hidden font-mono text-xs max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+          <div className="space-y-6">
+            {docSections.map((section) => {
+              const SectionIcon = section.icon;
+              return (
+                <div key={section.title} className="space-y-2">
+                  <div className="flex items-center gap-2 font-semibold uppercase tracking-wider text-emerald-400 text-[11px]">
+                    <SectionIcon className="h-3.5 w-3.5" />
+                    {section.title}
+                  </div>
+                  <ul className="space-y-1 border-l border-border/40 ml-1.5 pl-3">
+                    {section.links.map((link) => (
+                      <li key={link.href}>
+                        <a
+                          href={link.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block py-1 text-zinc-400 hover:text-emerald-400 transition-colors"
+                        >
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         </div>
-      </header>
+      )}
 
       {/* Search Dialog */}
       <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
-          <DialogHeader className="p-4 border-b border-border/60">
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-border/80 bg-card backdrop-blur-md">
+          <DialogHeader className="p-4 border-b border-border/60 bg-muted/20">
             <DialogTitle className="sr-only">Search Documentation</DialogTitle>
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center gap-2 font-mono">
+              <Search className="h-4 w-4 text-emerald-400" />
               <input
                 type="text"
                 placeholder="Search guide, configuration, deployment..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground/60"
+                className="w-full bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground/60 text-foreground"
                 autoFocus
               />
             </div>
@@ -204,13 +214,15 @@ export default function DocsPage() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setSearchOpen(false)}
-                  className="flex items-center justify-between rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  className="flex items-center justify-between rounded-md px-3 py-2 text-zinc-400 hover:bg-muted/40 hover:text-emerald-400 transition-colors"
                 >
                   <span className="flex items-center gap-2">
-                    <ChevronRight className="h-3 w-3 text-emerald-500" />
+                    <ChevronRight className="h-3 w-3 text-emerald-400" />
                     {link.label}
                   </span>
-                  <span className="text-[10px] text-muted-foreground/50 border border-border px-1.5 py-0.5 rounded">{link.section}</span>
+                  <span className="text-[10px] text-muted-foreground border border-border/60 px-1.5 py-0.5 rounded bg-zinc-900/60">
+                    {link.section}
+                  </span>
                 </a>
               ))
             ) : (
@@ -223,18 +235,18 @@ export default function DocsPage() {
       {/* Main Grid Layout */}
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-8 sm:px-8 md:grid-cols-12">
         {/* Desktop Sidebar */}
-        <aside className="sticky top-20 hidden h-[calc(100vh-6rem)] overflow-y-auto border-r border-border/40 pr-4 md:col-span-3 md:block">
+        <aside className="sticky top-20 hidden h-[calc(100vh-6rem)] overflow-y-auto border-r border-border/40 pr-4 md:col-span-3 md:block font-mono">
           <div className="space-y-6">
             {docSections.map((section) => {
               const SectionIcon = section.icon;
               return (
                 <div key={section.title} className="space-y-2">
-                  <div className="flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-                    <SectionIcon className="h-3.5 w-3.5 text-emerald-500" />
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/90">
+                    <SectionIcon className="h-3.5 w-3.5 text-emerald-400" />
                     {section.title}
                   </div>
 
-                  <ul className="space-y-1 font-mono text-xs border-l border-border/40 ml-1.5 pl-2">
+                  <ul className="space-y-1 text-xs border-l border-border/40 ml-1.5 pl-2">
                     {section.links.map((link) => {
                       const isActive = activeHash === link.href;
                       return (
@@ -243,8 +255,8 @@ export default function DocsPage() {
                             href={link.href}
                             className={`block rounded px-2.5 py-1 transition-all ${
                               isActive
-                                ? "bg-emerald-500/10 text-emerald-500 font-medium border-l-2 border-emerald-500 -ml-[11px] pl-[17px]"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                                ? "bg-emerald-500/10 text-emerald-400 font-semibold border-l-2 border-emerald-400 -ml-[11px] pl-[17px]"
+                                : "text-zinc-400 hover:text-foreground hover:bg-muted/30"
                             }`}
                           >
                             {link.label}
@@ -264,7 +276,7 @@ export default function DocsPage() {
           {/* Overview Section */}
           <section id="overview" className="scroll-mt-20 space-y-4">
             <div className="flex items-center gap-2 font-mono text-xs">
-              <Badge variant="outline" className="border-emerald-500/40 text-emerald-500 bg-emerald-500/10">
+              <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-mono text-[10px]">
                 v1.0.0
               </Badge>
               <span className="text-muted-foreground">•</span>
@@ -281,8 +293,8 @@ export default function DocsPage() {
 
             <Card className="border-emerald-500/30 bg-emerald-500/[0.03]">
               <CardContent className="space-y-2 p-4 font-mono text-xs">
-                <div className="flex items-center gap-2 font-bold text-emerald-500">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <div className="flex items-center gap-2 font-bold text-emerald-400">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                   Core Architecture Guarantee
                 </div>
                 <p className="leading-relaxed text-muted-foreground">
@@ -297,7 +309,7 @@ export default function DocsPage() {
           <section id="prerequisites" className="scroll-mt-20 space-y-4 pt-6 border-t border-border/40">
             <h2 className="text-2xl font-bold tracking-tight">Prerequisites</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Ensure you have Node.js (=18), npm, PostgreSQL, and Redis installed locally.
+              Ensure you have Node.js (&ge; 18), npm, PostgreSQL, and Redis installed locally.
             </p>
             <CodeBlock>{`brew install redis postgresql`}</CodeBlock>
             <p className="text-xs text-muted-foreground font-mono">Verify runtime binaries:</p>
@@ -385,7 +397,7 @@ PostgreSQL
               ingestion API.
             </p>
             <CodeBlock>{`npm install @telemetry-nexus/sdk`}</CodeBlock>
-            <p className="text-sm text-muted-foreground">
+            <div className="pt-2">
               <CodeBlock>{`import { telemetryMiddleware } from "@telemetry-nexus/sdk";
 
 app.use(
@@ -394,7 +406,7 @@ app.use(
     endpoint: "https://your-deployment.vercel.app/api/v1/logs",
   })
 );`}</CodeBlock>
-            </p>
+            </div>
           </section>
 
           {/* Ingestion API */}
@@ -427,7 +439,10 @@ HTTP 201 response`}</CodeBlock>
             <h2 className="text-2xl font-bold tracking-tight">Redis Streams</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Telemetry is stored in a Redis Stream named{" "}
-              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">telemetry</code>.
+              <code className="rounded bg-zinc-800/80 border border-border/60 px-1.5 py-0.5 font-mono text-xs text-zinc-200">
+                telemetry
+              </code>
+              .
             </p>
             <CodeBlock>{`redis-cli XLEN telemetry\nredis-cli XRANGE telemetry - +`}</CodeBlock>
           </section>
@@ -457,19 +472,19 @@ HTTP 201 response`}</CodeBlock>
               The worker uses an in-memory buffer with two distinct flush conditions to prevent continuous database IOPS overhead.
             </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Card>
+            <div className="grid gap-4 sm:grid-cols-2 font-mono">
+              <Card className="border border-border/60 bg-card/95">
                 <CardContent className="space-y-2 p-4">
-                  <h3 className="font-mono text-xs font-bold text-emerald-500">Capacity Trigger</h3>
+                  <h3 className="text-xs font-bold text-emerald-400">Capacity Trigger</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     When the in-memory buffer reaches 500 logs, it flushes to PostgreSQL immediately.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border border-border/60 bg-card/95">
                 <CardContent className="space-y-2 p-4">
-                  <h3 className="font-mono text-xs font-bold text-emerald-500">Timer Trigger</h3>
+                  <h3 className="text-xs font-bold text-emerald-400">Timer Trigger</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     A 2-second timer flushes any buffered logs to prevent low-volume telemetry from sitting indefinitely in memory.
                   </p>
@@ -507,7 +522,8 @@ Existing unresolved Incident?
           <section id="env-vars" className="scroll-mt-20 space-y-6 pt-6 border-t border-border/40">
             <h2 className="text-2xl font-bold tracking-tight">Environment Variables</h2>
             <p className="text-sm text-muted-foreground">
-              Configure your local <code className="font-mono text-xs">.env</code> file with the required service endpoints:
+              Configure your local <code className="font-mono text-xs border border-border/60 rounded px-1.5 py-0.5 bg-zinc-900">.env</code>{" "}
+              file with the required service endpoints:
             </p>
             <CodeBlock>{`DATABASE_URL="postgresql://YOUR_USER@localhost:5432/telemetry_nexus"
 BETTER_AUTH_SECRET="your-secret"
@@ -522,19 +538,19 @@ REDIS_URL="redis://localhost:6379"`}</CodeBlock>
               For a full local stack, run these three processes concurrently across separate terminal tabs:
             </p>
             <div className="space-y-3">
-              <Card>
+              <Card className="border border-border/60 bg-card/95">
                 <CardContent className="p-4 space-y-2">
                   <span className="font-mono text-xs font-bold text-foreground">Terminal 1 — Web Next.js Server</span>
                   <CodeBlock>{`npm run dev`}</CodeBlock>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="border border-border/60 bg-card/95">
                 <CardContent className="p-4 space-y-2">
                   <span className="font-mono text-xs font-bold text-foreground">Terminal 2 — Telemetry Worker</span>
                   <CodeBlock>{`npx tsx lib/redis/worker/telemetry-worker.ts`}</CodeBlock>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="border border-border/60 bg-card/95">
                 <CardContent className="p-4 space-y-2">
                   <span className="font-mono text-xs font-bold text-foreground">Terminal 3 — Redis Instance</span>
                   <CodeBlock>{`brew services start redis`}</CodeBlock>
@@ -583,7 +599,7 @@ Managed PostgreSQL`}</CodeBlock>
           {/* Docker */}
           <section id="docker" className="scroll-mt-20 space-y-6 pt-6 border-t border-border/40">
             <h2 className="text-2xl font-bold tracking-tight">Docker</h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Containerized deployment should execute the web application and telemetry worker as long-running processes.
             </p>
           </section>
@@ -591,7 +607,7 @@ Managed PostgreSQL`}</CodeBlock>
           {/* Railway */}
           <section id="railway" className="scroll-mt-20 space-y-6 pt-6 border-t border-border/40">
             <h2 className="text-2xl font-bold tracking-tight">Railway</h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Deploy Railway services for PostgreSQL, Redis, Next.js web application, and background telemetry worker.
             </p>
           </section>
@@ -609,16 +625,17 @@ Managed PostgreSQL`}</CodeBlock>
           <section id="troubleshooting" className="scroll-mt-20 space-y-4 pt-6 border-t border-border/40">
             <h2 className="text-2xl font-bold tracking-tight">Troubleshooting</h2>
 
-            <div className="space-y-4">
+            <div className="space-y-4 font-mono">
               <Card className="border-amber-500/30 bg-amber-500/[0.02]">
                 <CardContent className="p-4 space-y-1">
-                  <div className="flex items-center gap-2 font-semibold text-xs text-amber-500 font-mono">
+                  <div className="flex items-center gap-2 font-semibold text-xs text-amber-400">
                     <AlertTriangle className="h-4 w-4" />
                     Worker processes skipping logs?
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Ensure the background process running <code className="font-mono text-foreground">telemetry-worker.ts</code> is distinct
-                    from the primary Next.js server instance.
+                    Ensure the background process running{" "}
+                    <code className="text-foreground border border-border/60 rounded px-1 py-0.5 bg-zinc-900">telemetry-worker.ts</code> is
+                    distinct from the primary Next.js server instance.
                   </p>
                 </CardContent>
               </Card>
