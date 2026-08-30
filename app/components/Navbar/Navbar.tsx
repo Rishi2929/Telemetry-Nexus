@@ -4,15 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import { Terminal, LogIn, Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
 
 const navigation = [
   { label: "Features", href: "/features" },
-  { label: "Pricing", href: "/pricing" },
+  { label: "Architectue", href: "/architecture" },
   { label: "Docs", href: "/docs" },
 ];
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-card/80 backdrop-blur-md font-sans">
@@ -28,16 +30,23 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Nav Links */}
-        <nav className="hidden items-center gap-1 md:flex rounded-full border border-border/40 bg-muted/20 px-3 py-1 font-mono text-xs">
-          {navigation.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="px-3 py-1.5 rounded-md text-zinc-400 transition-colors hover:text-emerald-400 hover:bg-zinc-800/40"
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav className="hidden items-center rounded-full border border-border/60 bg-muted/20 px-3 py-1 font-mono text-xs md:flex">
+          {navigation.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                  isActive
+                    ? "border border-emerald-500/20 bg-emerald-500/10 font-medium text-emerald-400"
+                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Desktop Auth Actions */}
