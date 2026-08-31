@@ -1,14 +1,29 @@
 import "dotenv/config";
-import { redis } from "@/lib/redis/client";
-import { TELEMETRY_STREAM } from "@/lib/redis/telemetry-stream";
-import { processTelemetryBatch } from "@/lib/services/telemetry-batch-processor";
+
+import { randomUUID } from "crypto";
+
 import { Prisma } from "@/app/generated/prisma/client";
 
-let lastId = "$";
+import { redis } from "@/lib/redis/client";
+
+import { TELEMETRY_STREAM } from "@/lib/redis/telemetry-stream";
+
+import { ensureTelemetryConsumerGroup, TELEMETRY_CONSUMER_GROUP } from "@/lib/redis/consumer-group";
+
+import { processTelemetryBatch } from "@/lib/services/telemetry-batch-processor";
+
+const CONSUMER_NAME = `worker-${randomUUID()}`;
+
 const BATCH_SIZE = 500;
 const BATCH_TIMEOUT = 2000;
 
-let buffer: Prisma.ApiLogCreateManyInput[] = [];
+type BufferedTelemetry = {
+  id: string;
+  log: Prisma.ApiLogCreateManyInput;
+};
+
+let buffer: BufferedTelemetry[] = [];
+
 let flushTimer: NodeJS.Timeout | null = null;
 
 async function flushBuffer() {
@@ -25,9 +40,20 @@ async function flushBuffer() {
     flushTimer = null;
   }
 
-  await processTelemetryBatch(batch);
+  try {
+    await processTelemetryBatch(batch.map((item) => item.log));
 
-  console.log(`Flushed batch of ${batch.length} logs`);
+    await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, ...batch.map((item) => item.id));
+
+    console.log(`Flushed and acknowledged batch of ${batch.length} logs`);
+  } catch (error) {
+    // Put the messages back into the buffer.
+    buffer.unshift(...batch);
+
+    console.error("Batch processing failed:", error);
+
+    throw error;
+  }
 }
 
 function startFlushTimer() {
@@ -42,11 +68,20 @@ function startFlushTimer() {
   }, BATCH_TIMEOUT);
 }
 
-//This is the consumer
+// Consumer
 async function processTelemetry() {
-  const result = await redis.xread("COUNT", BATCH_SIZE, "BLOCK", 5000, "STREAMS", TELEMETRY_STREAM, lastId);
-
-  // console.log("XREAD RESULT:", result);
+  const result = await redis.xreadgroup(
+    "GROUP",
+    TELEMETRY_CONSUMER_GROUP,
+    CONSUMER_NAME,
+    "COUNT",
+    BATCH_SIZE,
+    "BLOCK",
+    5000,
+    "STREAMS",
+    TELEMETRY_STREAM,
+    ">",
+  );
 
   if (!result) {
     return;
@@ -54,49 +89,57 @@ async function processTelemetry() {
 
   for (const [, messages] of result) {
     for (const [id, fields] of messages) {
+      if (!fields) {
+        console.error(`Missing fields in Redis message ${id}`);
+        continue;
+      }
       const dataIndex = fields.indexOf("data");
 
       if (dataIndex === -1) {
         console.error(`Missing data field in Redis message ${id}`);
+
         continue;
       }
 
       const data = JSON.parse(fields[dataIndex + 1]);
 
       buffer.push({
-        projectId: data.projectId,
-        requestId: data.requestId,
-        level: data.level,
-        message: data.message,
-        method: data.method,
-        endpoint: data.endpoint,
-        environment: data.environment,
-        statusCode: data.statusCode,
-        latency: data.latency,
-        ipAddress: data.ipAddress,
-        userAgent: data.userAgent,
-        metadata: data.metadata,
-        createdAt: new Date(data.createdAt),
-      });
+        id,
 
-      lastId = id;
+        log: {
+          projectId: data.projectId,
+          requestId: data.requestId,
+          level: data.level,
+          message: data.message,
+          method: data.method,
+          endpoint: data.endpoint,
+          environment: data.environment,
+          statusCode: data.statusCode,
+          latency: data.latency,
+          ipAddress: data.ipAddress,
+          userAgent: data.userAgent,
+          metadata: data.metadata,
+          createdAt: new Date(data.createdAt),
+        },
+      });
 
       if (buffer.length === 1) {
         startFlushTimer();
       }
+
       if (buffer.length >= BATCH_SIZE) {
         await flushBuffer();
       }
     }
   }
-
-  // await processTelemetryBatch(logs);
-
-  console.log(`Processed ${buffer.length} telemetry logs`);
 }
 
 async function main() {
+  await ensureTelemetryConsumerGroup();
+
   console.log("Telemetry worker started");
+  console.log(`Consumer group: ${TELEMETRY_CONSUMER_GROUP}`);
+  console.log(`Consumer: ${CONSUMER_NAME}`);
 
   while (true) {
     try {
@@ -107,4 +150,7 @@ async function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error("Telemetry worker failed to start:", error);
+  process.exit(1);
+});
