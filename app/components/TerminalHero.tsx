@@ -59,8 +59,8 @@ export default function TerminalHero() {
           </h1>
 
           <p className="text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed">
-            TelemetryNexus captures API requests with $O(1)$ constant-time overhead, buffering telemetry into Redis and persistence workers
-            to maintain near-baseline application performance under heavy concurrency[cite: 1, 2].
+            TelemetryNexus captures API telemetry with minimal O(1) overhead, using Redis and background workers to keep your APIs fast
+            under heavy traffic.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-4 font-mono text-xs">

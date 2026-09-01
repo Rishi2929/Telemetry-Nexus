@@ -43,6 +43,10 @@ async function flushBuffer() {
   try {
     await processTelemetryBatch(batch.map((item) => item.log));
 
+    // console.log("TEST: stopping before XACK");
+
+    // process.exit(1);
+
     await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, ...batch.map((item) => item.id));
 
     console.log(`Flushed and acknowledged batch of ${batch.length} logs`);
@@ -141,6 +145,8 @@ async function main() {
   console.log(`Consumer group: ${TELEMETRY_CONSUMER_GROUP}`);
   console.log(`Consumer: ${CONSUMER_NAME}`);
 
+  await recoverPendingMessages();
+
   while (true) {
     try {
       await processTelemetry();
@@ -154,3 +160,70 @@ main().catch((error) => {
   console.error("Telemetry worker failed to start:", error);
   process.exit(1);
 });
+
+async function recoverPendingMessages() {
+  // const PENDING_MESSAGE_IDLE_TIME_DEV = 5_000;
+
+  const PENDING_MESSAGE_IDLE_TIME = 30_000;
+
+  const result = await redis.xautoclaim(
+    TELEMETRY_STREAM,
+    TELEMETRY_CONSUMER_GROUP,
+    CONSUMER_NAME,
+    PENDING_MESSAGE_IDLE_TIME,
+    "0-0",
+    "COUNT",
+    BATCH_SIZE,
+  );
+
+  const messages = result[1] as [string, string[]][] | undefined;
+
+  if (!messages || messages.length === 0) {
+    return;
+  }
+
+  console.log(`Recovered ${messages.length} pending telemetry messages`);
+
+  for (const [id, fields] of messages) {
+    if (!fields) {
+      console.error(`Missing fields in Redis message ${id}`);
+      continue;
+    }
+
+    const dataIndex = fields.indexOf("data");
+
+    if (dataIndex === -1 || !fields[dataIndex + 1]) {
+      console.error(`Missing data field in Redis message ${id}`);
+      continue;
+    }
+
+    const data = JSON.parse(fields[dataIndex + 1]);
+
+    buffer.push({
+      id,
+      log: {
+        projectId: data.projectId,
+        requestId: data.requestId,
+        level: data.level,
+        message: data.message,
+        method: data.method,
+        endpoint: data.endpoint,
+        environment: data.environment,
+        statusCode: data.statusCode,
+        latency: data.latency,
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+        metadata: data.metadata,
+        createdAt: new Date(data.createdAt),
+      },
+    });
+
+    if (buffer.length === 1) {
+      startFlushTimer();
+    }
+
+    if (buffer.length >= BATCH_SIZE) {
+      await flushBuffer();
+    }
+  }
+}

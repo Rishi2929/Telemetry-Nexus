@@ -1,7 +1,7 @@
 const BASE_URL = "http://localhost:3001";
 
-const TOTAL_REQUESTS = 5_00;
-const CONCURRENCY = 10;
+const TOTAL_REQUESTS = 2_0;
+const CONCURRENCY = 5;
 
 const ENDPOINTS = [
   // Normal traffic
