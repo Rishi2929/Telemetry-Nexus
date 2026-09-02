@@ -4,6 +4,8 @@ export type MonitorOptions = {
 };
 
 export type TelemetryPayload = {
+  requestId: string;
+
   level: "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL";
 
   message: string;

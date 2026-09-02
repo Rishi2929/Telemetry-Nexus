@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 
 import type { MonitorOptions, TelemetryPayload } from "./types";
 import { sendTelemetry } from "./sender";
+import { randomUUID } from "crypto";
 
 function getLogLevel(statusCode: number): TelemetryPayload["level"] {
   if (statusCode >= 500) {
@@ -17,11 +18,14 @@ function getLogLevel(statusCode: number): TelemetryPayload["level"] {
 export function monitor(options: MonitorOptions) {
   return function telemetryMiddleware(request: Request, response: Response, next: NextFunction) {
     const startTime = Date.now();
+    const requestId = randomUUID();
 
     response.on("finish", async () => {
       const latency = Date.now() - startTime;
 
       const telemetry: TelemetryPayload = {
+        requestId,
+
         level: getLogLevel(response.statusCode),
 
         message: `${request.method} ${request.originalUrl}`,
