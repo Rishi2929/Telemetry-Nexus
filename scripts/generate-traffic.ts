@@ -1,6 +1,6 @@
 const BASE_URL = "http://localhost:3001";
 
-const TOTAL_REQUESTS = 2_0;
+const TOTAL_REQUESTS = 1_00;
 const CONCURRENCY = 5;
 
 const ENDPOINTS = [

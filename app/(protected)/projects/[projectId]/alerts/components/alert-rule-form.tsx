@@ -90,7 +90,7 @@ export function AlertRuleForm({ projectId }: AlertRuleFormProps) {
               </SelectTrigger>
               <SelectContent className="bg-zinc-950 border-border/80 font-mono text-xs text-zinc-200">
                 <SelectItem value={AlertMetric.ERROR_RATE}>Error Rate (%)</SelectItem>
-                <SelectItem value={AlertMetric.LATENCY}>Avg Latency (ms)</SelectItem>
+                <SelectItem value={AlertMetric.LATENCY}>Latency (ms)</SelectItem>
               </SelectContent>
             </Select>
           </FormFieldGroup>
@@ -138,7 +138,7 @@ export function AlertRuleForm({ projectId }: AlertRuleFormProps) {
             <span>
               {metric === AlertMetric.ERROR_RATE
                 ? "Triggers when HTTP error responses exceed this percentage."
-                : "Triggers when average execution delay exceeds this millisecond count."}
+                : "Triggers when a request exceeds this latency threshold."}
             </span>
           </p>
         </FormFieldGroup>
