@@ -1,15 +1,9 @@
 import "dotenv/config";
-
 import { randomUUID } from "crypto";
-
 import { Prisma } from "@/app/generated/prisma/client";
-
 import { redis } from "@/lib/redis/client";
-
 import { TELEMETRY_STREAM } from "@/lib/redis/telemetry-stream";
-
 import { ensureTelemetryConsumerGroup, TELEMETRY_CONSUMER_GROUP } from "@/lib/redis/consumer-group";
-
 import { processTelemetryBatch } from "@/lib/services/telemetry-batch-processor";
 
 const CONSUMER_NAME = `worker-${randomUUID()}`;
@@ -23,8 +17,9 @@ type BufferedTelemetry = {
 };
 
 let buffer: BufferedTelemetry[] = [];
-
 let flushTimer: NodeJS.Timeout | null = null;
+
+let shuttingDown = false;
 
 async function flushBuffer() {
   if (buffer.length === 0) {
@@ -32,7 +27,6 @@ async function flushBuffer() {
   }
 
   const batch = buffer;
-
   buffer = [];
 
   if (flushTimer) {
@@ -42,20 +36,15 @@ async function flushBuffer() {
 
   try {
     await processTelemetryBatch(batch.map((item) => item.log));
-
     // console.log("TEST: stopping before XACK");
-
     // process.exit(1);
-
     await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, ...batch.map((item) => item.id));
 
     console.log(`Flushed and acknowledged batch of ${batch.length} logs`);
   } catch (error) {
     // Put the messages back into the buffer.
     buffer.unshift(...batch);
-
     console.error("Batch processing failed:", error);
-
     throw error;
   }
 }
@@ -138,6 +127,37 @@ async function processTelemetry() {
   }
 }
 
+async function shutdown(signal: string) {
+  if (shuttingDown) {
+    return;
+  }
+
+  shuttingDown = true;
+
+  console.log(`Received ${signal}. Shutting down telemetry worker...`);
+
+  if (flushTimer) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
+
+  try {
+    await flushBuffer();
+
+    console.log("Telemetry worker shutdown complete");
+
+    await redis.quit();
+
+    process.exit(0);
+  } catch (error) {
+    console.error("Telemetry worker shutdown failed:", error);
+
+    await redis.quit().catch(() => {});
+
+    process.exit(1);
+  }
+}
+
 async function main() {
   await ensureTelemetryConsumerGroup();
 
@@ -147,7 +167,7 @@ async function main() {
 
   await recoverPendingMessages();
 
-  while (true) {
+  while (!shuttingDown) {
     try {
       await processTelemetry();
     } catch (error) {
@@ -155,6 +175,14 @@ async function main() {
     }
   }
 }
+
+process.on("SIGINT", () => {
+  void shutdown("SIGINT");
+});
+
+process.on("SIGTERM", () => {
+  void shutdown("SIGTERM");
+});
 
 main().catch((error) => {
   console.error("Telemetry worker failed to start:", error);
