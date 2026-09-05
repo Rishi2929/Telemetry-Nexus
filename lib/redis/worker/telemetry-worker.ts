@@ -84,17 +84,28 @@ async function processTelemetry() {
     for (const [id, fields] of messages) {
       if (!fields) {
         console.error(`Missing fields in Redis message ${id}`);
+
+        await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, id);
         continue;
       }
       const dataIndex = fields.indexOf("data");
 
       if (dataIndex === -1) {
         console.error(`Missing data field in Redis message ${id}`);
+        await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, id);
 
         continue;
       }
 
-      const data = JSON.parse(fields[dataIndex + 1]);
+      let data;
+
+      try {
+        data = JSON.parse(fields[dataIndex + 1]);
+      } catch (error) {
+        console.error(`Invalid JSON in Redis message ${id}:`, error);
+        await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, id);
+        continue;
+      }
 
       buffer.push({
         id,
@@ -215,6 +226,7 @@ async function recoverPendingMessages() {
   for (const [id, fields] of messages) {
     if (!fields) {
       console.error(`Missing fields in Redis message ${id}`);
+      await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, id);
       continue;
     }
 
@@ -222,10 +234,20 @@ async function recoverPendingMessages() {
 
     if (dataIndex === -1 || !fields[dataIndex + 1]) {
       console.error(`Missing data field in Redis message ${id}`);
+      await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, id);
+
       continue;
     }
 
-    const data = JSON.parse(fields[dataIndex + 1]);
+    let data;
+
+    try {
+      data = JSON.parse(fields[dataIndex + 1]);
+    } catch (error) {
+      console.error(`Invalid JSON in Redis message ${id}`);
+      await redis.xack(TELEMETRY_STREAM, TELEMETRY_CONSUMER_GROUP, id);
+      continue;
+    }
 
     buffer.push({
       id,
